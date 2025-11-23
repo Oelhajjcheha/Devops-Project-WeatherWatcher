@@ -63,5 +63,5 @@ def get_info():
     return {
         "project": "Weather Watcher",
         "sprint": 1,
-        "tech_stack": ["FastAPI", "Azure", "Docker", "GitHub Actions"]
+        "tech_stack": ["FastAPI", "Azure App Service", "Azure DevOps"]
     }
