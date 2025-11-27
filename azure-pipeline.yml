@@ -1,0 +1,46 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - checkout: self
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.11'
+    displayName: 'Use Python 3.11'
+
+  - script: |
+      python -m pip install --upgrade pip
+      pip install -r requirements.txt
+    displayName: 'Install dependencies'
+
+  - script: |
+      pytest --maxfail=1 --disable-warnings -q
+    displayName: 'Run automated tests'
+
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/drop.zip'
+      replaceExistingArchive: true
+    displayName: 'Create ZIP for deployment'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/drop.zip'
+      ArtifactName: 'drop'
+    displayName: 'Publish artifact'
+
+  - task: AzureWebApp@1
+    inputs:
+      azureSubscription: 'WeatherWatcherServiceConnection'
+      appName: 'weather-watcher-4B2025'
+      package: '$(Build.ArtifactStagingDirectory)/drop.zip'
+    displayName: 'Deploy to Azure App Service'
