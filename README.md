@@ -61,9 +61,50 @@ pytest tests/ -v
 - [x] Local development setup
 - [x] FastAPI app with 3 endpoints
 - [x] Tests passing (3/3)
-- [ ] Azure deployment
+- [x] Azure deployment
 - [ ] CI/CD pipeline
 
 ---
+
+## Azure Deployment Information
+
+### Resource Details
+- **Resource Group:** BCSAI2025-DEVOPS-STUDENT-4B
+- **App Service Plan:** asp-weather-watcher (F1 Free tier)
+- **App Service Name:** weather-watcher-4B2025
+- **Location:** North Europe
+- **Runtime:** Python 3.11
+
+### Live Application
+- **URL:** https://weather-watcher-4b2025.azurewebsites.net
+
+### Endpoints
+- Homepage: https://weather-watcher-4b2025.azurewebsites.net/
+- Health Check: https://weather-watcher-4b2025.azurewebsites.net/health
+- API Info: https://weather-watcher-4b2025.azurewebsites.net/api/info
+
+### Deployment Status
+- ✅ Application deployed successfully
+- ✅ All endpoints verified working
+- ✅ Build process configured with SCM_DO_BUILD_DURING_DEPLOYMENT=true
+" >> README.md
+```
+```
+🎉 INFRASTRUCTURE DEPLOYMENT COMPLETE! 🎉
+
+✅ Azure App Service is live and running!
+
+📋 Deployment Details:
+- Resource Group: BCSAI2025-DEVOPS-STUDENT-4B
+- App Service: weather-watcher-4B2025
+- Location: North Europe
+- Runtime: Python 3.11
+
+🌐 Live URL: https://weather-watcher-4b2025.azurewebsites.net
+
+✅ All endpoints verified working:
+- / (homepage)
+- /health (health check)
+- /api/info (API information)
 
 IE University - BCSAI - SDDO - 2025
