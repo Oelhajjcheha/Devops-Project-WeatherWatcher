@@ -22,11 +22,17 @@ Each team member answers 3 questions:
 - N/A (Sprint start)
 
 **Today:**
+- Set up Azure CLI and logged into subscription
+- Created Resource Group, App Service Plan (F1 tier), and App Service (Python 3.11)
+- Deployed FastAPI application to Azure App Service
+- Verified all endpoints working (/, /health, /api/info)
+- Shared deployment credentials with team
+- Created feature branch and Pull Request
 
--
 
 **Issues:**
-
+- Azure quota limits in West Europe - switched to North Europe
+- Application deployment build failures; resolved by enabling SCM_DO_BUILD_DURING_DEPLOYMENT
 -
 
 ---
