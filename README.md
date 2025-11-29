@@ -36,6 +36,7 @@ Open http://localhost:8000 in your browser.
 ### 4. Run tests
 bash
 pytest tests/ -v
+test deployment
 
 
 ## API Endpoints
