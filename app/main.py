@@ -65,3 +65,4 @@ def get_info():
         "sprint": 1,
         "tech_stack": ["FastAPI", "Azure App Service", "Azure DevOps"]
     }
+    # Application Insights logging will be added here
