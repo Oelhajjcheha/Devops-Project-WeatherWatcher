@@ -1,10 +1,39 @@
+import os
+import logging
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
+# Application Insights (OpenCensus)
+from opencensus.ext.azure.log_exporter import AzureLogHandler
+from opencensus.ext.azure.trace_exporter import AzureExporter
+from opencensus.trace.samplers import ProbabilitySampler
+from opencensus.trace.tracer import Tracer
+
+# ----------------------------------------------------
+# Application Insights Setup
+# ----------------------------------------------------
+conn_str = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
+
+logger = logging.getLogger(__name__)
+logger.addHandler(AzureLogHandler(connection_string=conn_str))
+logger.setLevel(logging.INFO)
+
+tracer = Tracer(
+    exporter=AzureExporter(connection_string=conn_str),
+    sampler=ProbabilitySampler(1.0)
+)
+
+# ----------------------------------------------------
+# FastAPI App
+# ----------------------------------------------------
 app = FastAPI(title="Weather Watcher", version="0.1.0")
 
 @app.get("/")
 def read_root():
+    # Logging + tracing
+    logger.info("Home page accessed")
+    tracer.span(name="home-page")
+
     html_content = """
     <!DOCTYPE html>
     <html>
@@ -52,6 +81,9 @@ def read_root():
 
 @app.get("/health")
 def health_check():
+    logger.info("Health check endpoint called")
+    tracer.span(name="health-check")
+
     return {
         "status": "healthy",
         "version": "0.1.0",
@@ -60,9 +92,11 @@ def health_check():
 
 @app.get("/api/info")
 def get_info():
+    logger.info("API info endpoint accessed")
+    tracer.span(name="api-info")
+
     return {
         "project": "Weather Watcher",
         "sprint": 1,
         "tech_stack": ["FastAPI", "Azure App Service", "Azure DevOps"]
     }
-    # Application Insights logging will be added here
