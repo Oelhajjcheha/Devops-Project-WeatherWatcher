@@ -4,3 +4,5 @@ pytest==7.4.3
 httpx==0.25.2
 python-dotenv==1.0.0
 gunicorn==21.2.0
+opencensus
+opencensus-ext-azure
