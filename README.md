@@ -108,3 +108,37 @@ pytest tests/ -v
 - /api/info (API information)
 
 IE University - BCSAI - SDDO - 2025
+
+
+
+
+
+![alt text](image.png)
+
+
+
+## Azure Resources
+
+**Resource Group:**  
+`BCSAI2025-DEVOPS-STUDENT-4B`
+
+**App Service:**  
+`weather-watcher-4B2025`  
+**URL:** weather-watcher-4b2025.azurewebsites.net
+
+**Application Insights:**  
+`ai-weather-watcher`
+
+**Pipeline URL:**  
+https://dev.azure.com/BCSAI2025-DEVOPS-STUDENTS-B/_build
+
+---
+
+### Additional Azure resources created automatically:
+- **App Service Plan:** `asp-weather-watcher`
+- **Log Analytics Workspace:** `e0b9cada-61bc-4b5a-bd7a-52c606726ef7`
+- **Smart Detector Alert:** `Failure Anomalies - ai-weather-watcher`
+- **Metric Alert:** `Failed requests`
+- **Action Group:** `devops-alerts`
+- **Shared Dashboard:** `83dea926-dda3-41c1-a7ac-03667ee213f3`
+- **Azure Workbook:** `06a88c54-5b0a-4b9d-b670-e5522d9b51cb`
