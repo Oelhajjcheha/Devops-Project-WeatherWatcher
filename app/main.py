@@ -1,9 +1,24 @@
 import os
+import re
 import logging
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Path
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 import httpx
+
+# Load environment variables from .env file (for local development)
+from dotenv import load_dotenv
+load_dotenv()
+
+# Import weather service
+from app.services.weather_service import (
+    WeatherService,
+    WeatherData,
+    CityNotFoundError,
+    WeatherAPIError,
+    APIKeyMissingError,
+)
 
 # -----------------------------------------------
 # Application Insights (OpenCensus)
@@ -536,6 +551,7 @@ def read_root():
             }
         </style>
         </style>
+        </style>
     </head>
     <body>
         <!-- Main container for semantic structure -->
@@ -836,64 +852,260 @@ def get_info():
     }
 
 
-# -----------------------------------------------
-# Weather API Endpoint
-# -----------------------------------------------
-@app.get("/api/weather")
-async def get_weather(city: str = Query(..., description="City name")):
+@app.get("/api/debug")
+def debug_config():
     """
-    Fetch weather data for a given city.
-    Uses OpenWeatherMap API if API key is available, otherwise returns mock data.
+    Debug endpoint to check if environment variables are loaded.
+    Shows if API key is configured (without revealing the actual key).
     """
-    # Get API key from environment variable
-    api_key = os.getenv("OPENWEATHER_API_KEY")
+    api_key = os.getenv("GOOGLE_MAPS_API_KEY")
+    app_insights = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
     
-    # If no API key, return mock data for development
+    return {
+        "google_maps_api_key_configured": bool(api_key and len(api_key) > 10),
+        "google_maps_api_key_length": len(api_key) if api_key else 0,
+        "google_maps_api_key_preview": f"{api_key[:8]}..." if api_key and len(api_key) > 8 else "NOT SET",
+        "app_insights_configured": bool(app_insights),
+        "environment": os.getenv("ENVIRONMENT", "production"),
+        "dotenv_loaded": True,  # If this endpoint works, dotenv was loaded
+    }
+
+
+# -----------------------------------------------
+# Pydantic Models for API Response
+# -----------------------------------------------
+class WeatherResponse(BaseModel):
+    """Response model for weather data."""
+    city: str = Field(..., description="City name")
+    country: str = Field(..., description="Country code (ISO 3166-1 alpha-2)")
+    temperature: int = Field(..., description="Temperature in Celsius")
+    feels_like: int = Field(..., description="Feels like temperature in Celsius")
+    description: str = Field(..., description="Weather condition description")
+    humidity: int = Field(..., ge=0, le=100, description="Relative humidity percentage")
+    wind_speed: float = Field(..., ge=0, description="Wind speed in m/s")
+    pressure: int = Field(..., description="Atmospheric pressure in hPa")
+    icon: str = Field(..., description="Weather icon code")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "city": "London",
+                "country": "GB",
+                "temperature": 15,
+                "feels_like": 14,
+                "description": "Partly cloudy",
+                "humidity": 72,
+                "wind_speed": 4.2,
+                "pressure": 1015,
+                "icon": "02d"
+            }
+        }
+
+
+# -----------------------------------------------
+# Input Validation Helper
+# -----------------------------------------------
+def validate_city_name(city: str) -> str:
+    """
+    Validate and sanitize city name input.
+    
+    Args:
+        city: Raw city name input
+        
+    Returns:
+        Sanitized city name
+        
+    Raises:
+        HTTPException: If city name is invalid
+    """
+    if not city or not city.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="City name cannot be empty"
+        )
+    
+    # Strip whitespace and limit length
+    city = city.strip()
+    
+    if len(city) < 2:
+        raise HTTPException(
+            status_code=400,
+            detail="City name must be at least 2 characters"
+        )
+    
+    if len(city) > 100:
+        raise HTTPException(
+            status_code=400,
+            detail="City name too long (max 100 characters)"
+        )
+    
+    # Allow letters, spaces, hyphens, commas, periods, and apostrophes
+    # This covers names like "St. John's", "New York, NY", "São Paulo"
+    if not re.match(r"^[\w\s\-,.'À-ÿ]+$", city, re.UNICODE):
+        raise HTTPException(
+            status_code=400,
+            detail="City name contains invalid characters"
+        )
+    
+    return city
+
+
+# -----------------------------------------------
+# Weather Service Instance
+# -----------------------------------------------
+weather_service = WeatherService()
+
+
+# -----------------------------------------------
+# Weather API Endpoints
+# -----------------------------------------------
+@app.get(
+    "/weather/{city}",
+    response_model=WeatherResponse,
+    summary="Get weather by city (path parameter)",
+    description="Fetch current weather data for a city using Google Weather API.",
+    responses={
+        200: {"description": "Weather data retrieved successfully"},
+        400: {"description": "Invalid city name"},
+        404: {"description": "City not found"},
+        500: {"description": "Weather service error"},
+        503: {"description": "Google Weather API not configured"},
+        504: {"description": "Weather service timeout"},
+    }
+)
+async def get_weather_by_path(
+    city: str = Path(
+        ...,
+        min_length=2,
+        max_length=100,
+        description="City name (e.g., 'London', 'New York', 'Tokyo')",
+        example="London"
+    )
+):
+    """
+    Fetch current weather data for a city.
+    
+    This endpoint uses the Google Maps Weather API to retrieve real-time
+    weather conditions for the specified city.
+    
+    **Example cities:**
+    - London
+    - New York
+    - Tokyo
+    - Paris
+    - Sydney
+    """
+    return await _fetch_weather_for_city(city)
+
+
+@app.get(
+    "/api/weather",
+    response_model=WeatherResponse,
+    summary="Get weather by city (query parameter)",
+    description="Fetch current weather data for a city using Google Weather API.",
+    responses={
+        200: {"description": "Weather data retrieved successfully"},
+        400: {"description": "Invalid city name"},
+        404: {"description": "City not found"},
+        500: {"description": "Weather service error"},
+        503: {"description": "Google Weather API not configured"},
+        504: {"description": "Weather service timeout"},
+    }
+)
+async def get_weather_by_query(
+    city: str = Query(
+        ...,
+        min_length=2,
+        max_length=100,
+        description="City name",
+        example="London"
+    )
+):
+    """
+    Fetch current weather data for a city (query parameter version).
+    
+    This endpoint is the same as /weather/{city} but uses a query parameter
+    for backward compatibility with the existing frontend.
+    """
+    return await _fetch_weather_for_city(city)
+
+
+async def _fetch_weather_for_city(city: str) -> dict:
+    """
+    Internal function to fetch weather data for a city.
+    
+    Handles both path and query parameter endpoints to avoid code duplication.
+    """
+    # Validate input
+    city = validate_city_name(city)
+    
+    # Check if API key is configured
+    api_key = os.getenv("GOOGLE_MAPS_API_KEY")
+    
     if not api_key:
-        logger.info(f"Using mock weather data for city: {city}")
+        # Return mock data for development/testing when API key is not set
+        logger.warning(f"GOOGLE_MAPS_API_KEY not set. Returning mock data for: {city}")
         return {
             "city": city.title(),
+            "country": "US",
             "temperature": 22,
             "feels_like": 24,
-            "description": "clear sky",
+            "description": "Clear sky (Mock Data)",
             "humidity": 65,
             "wind_speed": 3.5,
             "pressure": 1013,
-            "icon": "01d",
-            "country": "US"
+            "icon": "01d"
         }
     
-    # Use real OpenWeatherMap API
     try:
-        url = f"http://api.openweathermap.org/data/2.5/weather"
-        params = {
-            "q": city,
-            "appid": api_key,
-            "units": "metric"
+        # Fetch weather using the service
+        weather_data = await weather_service.get_weather_by_city(city)
+        
+        logger.info(f"Successfully fetched weather for: {city}")
+        
+        return {
+            "city": weather_data.city,
+            "country": weather_data.country,
+            "temperature": weather_data.temperature,
+            "feels_like": weather_data.feels_like,
+            "description": weather_data.description,
+            "humidity": weather_data.humidity,
+            "wind_speed": weather_data.wind_speed,
+            "pressure": weather_data.pressure,
+            "icon": weather_data.icon,
         }
         
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(url, params=params)
-            response.raise_for_status()
-            data = response.json()
-            
-            return {
-                "city": data["name"],
-                "temperature": round(data["main"]["temp"]),
-                "feels_like": round(data["main"]["feels_like"]),
-                "description": data["weather"][0]["description"],
-                "humidity": data["main"]["humidity"],
-                "wind_speed": round(data["wind"]["speed"], 1),
-                "pressure": data["main"]["pressure"],
-                "icon": data["weather"][0]["icon"],
-                "country": data["sys"]["country"]
-            }
-    except httpx.HTTPStatusError as e:
-        if e.response.status_code == 404:
-            raise HTTPException(status_code=404, detail="City not found")
-        raise HTTPException(status_code=500, detail="Weather service error")
-    except httpx.TimeoutException:
-        raise HTTPException(status_code=504, detail="Weather service timeout")
+    except CityNotFoundError as e:
+        logger.warning(f"City not found: {city}")
+        raise HTTPException(
+            status_code=404,
+            detail=f"City not found: {city}. Please check the spelling and try again."
+        )
+    
+    except APIKeyMissingError as e:
+        logger.error("Google Maps API key not configured")
+        raise HTTPException(
+            status_code=503,
+            detail="Weather service not configured. Please set GOOGLE_MAPS_API_KEY."
+        )
+    
+    except WeatherAPIError as e:
+        logger.error(f"Weather API error for {city}: {str(e)}")
+        
+        if "timeout" in str(e).lower():
+            raise HTTPException(
+                status_code=504,
+                detail="Weather service is taking too long to respond. Please try again."
+            )
+        
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to fetch weather data. Please try again later."
+        )
+    
     except Exception as e:
-        logger.error(f"Weather API error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to fetch weather data")
+        logger.error(f"Unexpected error fetching weather for {city}: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred. Please try again."
+        )
