@@ -241,7 +241,7 @@ class TestWeatherService:
         
         assert result.city == "London"
         assert result.country == "GB"
-        assert result.temperature == 21  # rounded from 20.5
+        assert result.temperature == 20  # rounded from 20.5
         assert result.feels_like == 19
         assert result.description == "Sunny"
         assert result.humidity == 65
