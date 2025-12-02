@@ -551,6 +551,7 @@ def read_root():
             }
         </style>
         </style>
+        </style>
     </head>
     <body>
         <!-- Main container for semantic structure -->
