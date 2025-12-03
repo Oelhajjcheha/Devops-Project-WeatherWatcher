@@ -1081,6 +1081,8 @@ async def _fetch_weather_for_city(city: str) -> dict:
         # Fetch weather using the service
         weather_data = await weather_service.get_weather_by_city(city)
         
+        track_weather_search(logger, city=city, success=True, temperature=weather_data.temperature)
+
         logger.info(f"Successfully fetched weather for: {city}")
         
         return {
@@ -1097,6 +1099,7 @@ async def _fetch_weather_for_city(city: str) -> dict:
         
     except CityNotFoundError as e:
         logger.warning(f"City not found: {city}")
+        track_weather_search(logger, city=city, success=False)
         raise HTTPException(
             status_code=404,
             detail=f"City not found: {city}. Please check the spelling and try again."
@@ -1111,7 +1114,7 @@ async def _fetch_weather_for_city(city: str) -> dict:
     
     except WeatherAPIError as e:
         logger.error(f"Weather API error for {city}: {str(e)}")
-        
+        track_weather_search(logger, city=city, success=False)
         if "timeout" in str(e).lower():
             raise HTTPException(
                 status_code=504,
@@ -1125,6 +1128,7 @@ async def _fetch_weather_for_city(city: str) -> dict:
     
     except Exception as e:
         logger.error(f"Unexpected error fetching weather for {city}: {str(e)}")
+        track_weather_search(logger, city=city, success=False)
         raise HTTPException(
             status_code=500,
             detail="An unexpected error occurred. Please try again."
