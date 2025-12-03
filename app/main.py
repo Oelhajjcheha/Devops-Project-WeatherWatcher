@@ -566,6 +566,69 @@ def read_root():
             * {
                 transition: color 0.2s ease, background-color 0.2s ease;
             }
+            /* Autocomplete Dropdown */
+.autocomplete-wrapper {
+    position: relative;
+    flex: 1;
+}
+
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 8px 24px var(--shadow);
+    margin-top: -12px;
+    padding-top: 12px;
+    display: none;
+}
+
+.autocomplete-dropdown.show {
+    display: block;
+    animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.autocomplete-item {
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.active {
+    background: var(--bg-secondary);
+}
+
+.autocomplete-item i {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.autocomplete-loading,
+.autocomplete-empty {
+    padding: 12px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
         </style>
         </style>
         </style>
@@ -579,23 +642,26 @@ def read_root():
             </header>
             
             <!-- Search form section -->
-            <section class="search-section" aria-label="Search for weather">
-                <form class="search-form" id="weatherForm" role="search">
-                    <input 
-                        type="text" 
-                        class="search-input" 
-                        id="cityInput" 
-                        placeholder="Enter city name..." 
-                        aria-label="City name"
-                        required
-                        autocomplete="off"
-                    >
-                    <button type="submit" class="search-button" id="searchButton" aria-label="Search weather">
-                        <i class="fas fa-search"></i>
-                        <span>Search</span>
-                    </button>
-                </form>
-            </section>
+<section class="search-section" aria-label="Search for weather">
+    <form class="search-form" id="weatherForm" role="search">
+        <div class="autocomplete-wrapper">
+            <input
+                type="text"
+                class="search-input"
+                id="cityInput"
+                placeholder="Enter city name (e.g., Madrid, Tokyo, New York...)"
+                aria-label="City name"
+                required
+                autocomplete="off"
+            >
+            <div id="autocompleteDropdown" class="autocomplete-dropdown"></div>
+        </div>
+        <button type="submit" class="search-button" id="searchButton" aria-label="Search weather">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span>Search</span>
+        </button>
+    </form>
+</section>
             
             <!-- Error message container -->
             <div class="error-message" id="errorMessage" role="alert" aria-live="polite">
@@ -648,6 +714,117 @@ def read_root():
         
         <!-- JavaScript for weather functionality -->
         <script>
+        // ===================================================
+// AUTOCOMPLETE FUNCTIONALITY
+// ===================================================
+let autocompleteTimeout = null;
+let selectedIndex = -1;
+
+const cityInput = document.getElementById('cityInput');
+const searchButton = document.getElementById('searchButton');
+const autocompleteDropdown = document.getElementById('autocompleteDropdown');
+const weatherForm = document.getElementById('weatherForm');
+
+function handleAutocomplete() {
+    const query = cityInput.value.trim();
+    if (autocompleteTimeout) clearTimeout(autocompleteTimeout);
+    if (query.length < 2) { hideAutocomplete(); return; }
+    autocompleteTimeout = setTimeout(() => fetchAutocomplete(query), 300);
+}
+
+async function fetchAutocomplete(query) {
+    try {
+        showAutocompleteLoading();
+        const response = await fetch(`/api/cities/autocomplete?query=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error('Failed');
+        const data = await response.json();
+        displayAutocomplete(data.suggestions || []);
+    } catch (error) {
+        console.error('Autocomplete error:', error);
+        hideAutocomplete();
+    }
+}
+
+function displayAutocomplete(suggestions) {
+    if (suggestions.length === 0) { showAutocompleteEmpty(); return; }
+    autocompleteDropdown.innerHTML = '';
+    selectedIndex = -1;
+    suggestions.forEach((suggestion, index) => {
+        const item = document.createElement('div');
+        item.className = 'autocomplete-item';
+        item.innerHTML = `<i class="fas fa-map-marker-alt"></i><span>${suggestion.display}</span>`;
+        item.addEventListener('click', () => selectSuggestion(suggestion));
+        item.dataset.city = suggestion.city;
+        item.dataset.index = index;
+        autocompleteDropdown.appendChild(item);
+    });
+    autocompleteDropdown.classList.add('show');
+}
+
+function showAutocompleteLoading() {
+    autocompleteDropdown.innerHTML = '<div class="autocomplete-loading"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
+    autocompleteDropdown.classList.add('show');
+}
+
+function showAutocompleteEmpty() {
+    autocompleteDropdown.innerHTML = '<div class="autocomplete-empty"><i class="fas fa-search"></i> No cities found</div>';
+    autocompleteDropdown.classList.add('show');
+}
+
+function hideAutocomplete() {
+    autocompleteDropdown.classList.remove('show');
+    selectedIndex = -1;
+}
+
+function selectSuggestion(suggestion) {
+    cityInput.value = suggestion.city;
+    hideAutocomplete();
+    weatherForm.dispatchEvent(new Event('submit'));
+}
+
+// Keyboard navigation
+cityInput.addEventListener('keydown', (e) => {
+    const items = autocompleteDropdown.querySelectorAll('.autocomplete-item');
+    if (!items.length) return;
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex + 1) % items.length;
+        updateSelection(items);
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = selectedIndex <= 0 ? items.length - 1 : selectedIndex - 1;
+        updateSelection(items);
+    } else if (e.key === 'Enter') {
+        if (selectedIndex >= 0 && items[selectedIndex]) {
+            e.preventDefault();
+            cityInput.value = items[selectedIndex].dataset.city;
+            hideAutocomplete();
+            weatherForm.dispatchEvent(new Event('submit'));
+        }
+    } else if (e.key === 'Escape') {
+        hideAutocomplete();
+    }
+});
+
+function updateSelection(items) {
+    items.forEach((item, index) => {
+        if (index === selectedIndex) {
+            item.classList.add('active');
+            item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        } else {
+            item.classList.remove('active');
+        }
+    });
+}
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.autocomplete-wrapper')) hideAutocomplete();
+});
+
+cityInput.addEventListener('input', handleAutocomplete);
+cityInput.addEventListener('focus', () => {
+    if (cityInput.value.trim().length >= 2) handleAutocomplete();
+});
             // ============================================
             // WEATHER ICON MAPPING
             // Maps OpenWeatherMap icon codes to Font Awesome icons
@@ -1129,3 +1306,62 @@ async def _fetch_weather_for_city(city: str) -> dict:
             status_code=500,
             detail="An unexpected error occurred. Please try again."
         )
+
+
+# -----------------------------------------------
+# City Autocomplete Endpoint
+# -----------------------------------------------
+@app.get(
+    "/api/cities/autocomplete",
+    summary="City autocomplete suggestions",
+    description="Get city suggestions as user types for autocomplete functionality.",
+)
+async def autocomplete_cities(
+    query: str = Query(
+        ...,
+        min_length=2,
+        max_length=100,
+        description="Search query (minimum 2 characters)",
+        example="Mad"
+    )
+):
+    """Get city autocomplete suggestions using Google Places API."""
+    
+    if not query or len(query.strip()) < 2:
+        raise HTTPException(status_code=400, detail="Query must be at least 2 characters")
+    
+    api_key = os.getenv("GOOGLE_MAPS_API_KEY")
+    
+    if not api_key:
+        logger.warning("GOOGLE_MAPS_API_KEY not set for autocomplete")
+        return {"suggestions": [{"city": f"{query.title()}", "country": "Mock", "display": f"{query.title()}, Mock"}]}
+    
+    try:
+        url = "https://maps.googleapis.com/maps/api/place/autocomplete/json"
+        params = {"input": query, "types": "(cities)", "key": api_key}
+        
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(url, params=params)
+            response.raise_for_status()
+            data = response.json()
+            
+            if data.get("status") != "OK":
+                return {"suggestions": []}
+            
+            suggestions = []
+            for prediction in data.get("predictions", [])[:10]:
+                description = prediction.get("description", "")
+                parts = [part.strip() for part in description.split(",")]
+                
+                if len(parts) >= 2:
+                    suggestions.append({
+                        "city": parts[0],
+                        "country": parts[-1],
+                        "display": description
+                    })
+            
+            return {"suggestions": suggestions}
+            
+    except Exception as e:
+        logger.error(f"Autocomplete error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch suggestions")
