@@ -583,7 +583,7 @@ def read_root():
     border-radius: 0 0 12px 12px;
     max-height: 300px;
     overflow-y: auto;
-    z-index: 1000;
+    z-index: 10000;
     box-shadow: 0 8px 24px var(--shadow);
     margin-top: -12px;
     padding-top: 12px;
