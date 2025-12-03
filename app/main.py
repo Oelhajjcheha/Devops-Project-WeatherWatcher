@@ -234,7 +234,7 @@ def read_root():
             }
             
             .search-input {
-                flex: 1;
+                width : 100%;
                 padding: 14px 20px;
                 background: var(--bg-secondary);
                 border: 1px solid var(--border);
@@ -824,6 +824,12 @@ document.addEventListener('click', (e) => {
 
 cityInput.addEventListener('input', handleAutocomplete);
 cityInput.addEventListener('focus', () => {
+    // Hide weather display when user clicks search box
+    const weatherDisplay = document.getElementById('weatherDisplay');
+    if (weatherDisplay) {
+        weatherDisplay.classList.remove('show');
+    }
+    
     if (cityInput.value.trim().length >= 2) handleAutocomplete();
 });
             // ============================================
