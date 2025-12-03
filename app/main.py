@@ -714,6 +714,7 @@ def read_root():
         
         <!-- JavaScript for weather functionality -->
         <script>
+        document.addEventListener('DOMContentLoaded', () => {
         // ===================================================
 // AUTOCOMPLETE FUNCTIONALITY
 // ===================================================
@@ -825,6 +826,7 @@ cityInput.addEventListener('input', handleAutocomplete);
 cityInput.addEventListener('focus', () => {
     if (cityInput.value.trim().length >= 2) handleAutocomplete();
 });
+}); // End DOMContentLoaded for autocomplete
             // ============================================
             // WEATHER ICON MAPPING
             // Maps OpenWeatherMap icon codes to Font Awesome icons
