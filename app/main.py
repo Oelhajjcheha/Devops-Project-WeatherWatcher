@@ -1411,3 +1411,112 @@ async def autocomplete_cities(
     except Exception as e:
         logger.error(f"Autocomplete error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to fetch suggestions")
+
+# -----------------------------------------------
+# Weather Forecast Endpoint
+# -----------------------------------------------
+@app.get(
+    "/api/forecast",
+    summary="Get 5-day weather forecast",
+    description="Get weather forecast for the next 5 days for a given city.",
+)
+async def get_forecast(
+    city: str = Query(
+        ...,
+        min_length=2,
+        max_length=100,
+        description="City name",
+        example="Madrid"
+    )
+):
+    """
+    Get 5-day weather forecast for a city.
+    
+    Returns forecast data for the next 5 days including:
+    - Date
+    - High/low temperatures
+    - Weather condition description
+    - Weather icon code
+    """
+    # Validate city name
+    city = validate_city_name(city)
+    
+    # Check if API key is configured
+    api_key = os.getenv("GOOGLE_MAPS_API_KEY")
+    
+    if not api_key:
+        logger.warning("GOOGLE_MAPS_API_KEY not set. Returning mock forecast data")
+        # Return mock forecast data for development
+        return {
+            "city": city.title(),
+            "forecasts": [
+                {
+                    "date": "2025-12-04",
+                    "temp_max": 15,
+                    "temp_min": 8,
+                    "description": "Partly cloudy",
+                    "icon": "02d"
+                },
+                {
+                    "date": "2025-12-05",
+                    "temp_max": 17,
+                    "temp_min": 10,
+                    "description": "Sunny",
+                    "icon": "01d"
+                },
+                {
+                    "date": "2025-12-06",
+                    "temp_max": 14,
+                    "temp_min": 9,
+                    "description": "Rainy",
+                    "icon": "10d"
+                },
+                {
+                    "date": "2025-12-07",
+                    "temp_max": 12,
+                    "temp_min": 7,
+                    "description": "Cloudy",
+                    "icon": "04d"
+                },
+                {
+                    "date": "2025-12-08",
+                    "temp_max": 16,
+                    "temp_min": 9,
+                    "description": "Clear sky",
+                    "icon": "01d"
+                }
+            ]
+        }
+    
+    try:
+        # Create weather service instance
+        weather_service = WeatherService(api_key=api_key)
+        
+        # Fetch forecast
+        forecasts = await weather_service.get_forecast_by_city(city)
+        
+        logger.info(f"Successfully fetched forecast for: {city}")
+        
+        return {
+            "city": city.title(),
+            "forecasts": forecasts
+        }
+        
+    except CityNotFoundError:
+        logger.warning(f"City not found: {city}")
+        raise HTTPException(
+            status_code=404,
+            detail=f"City not found: {city}"
+        )
+    except WeatherAPIError as e:
+        logger.error(f"Forecast API error for {city}: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to fetch forecast data"
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error fetching forecast for {city}: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="An unexpected error occurred"
+        )

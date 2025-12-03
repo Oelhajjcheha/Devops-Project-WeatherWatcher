@@ -353,6 +353,105 @@ class WeatherService:
         # Step 3: Parse and return formatted data
         return self._parse_weather_response(weather_data, location)
     
+    async def get_forecast_by_city(self, city: str) -> list:
+        """
+        Get 5-day weather forecast for a city.
+        
+        Args:
+            city: City name (e.g., "London", "Madrid")
+            
+        Returns:
+            List of forecast data for next 5 days
+            
+        Raises:
+            CityNotFoundError: If the city cannot be found
+            WeatherAPIError: If the API call fails
+        """
+        self._validate_api_key()
+        
+        # First, geocode the city to get coordinates
+        geo_location = await self._geocode_city(city)
+        
+        # Fetch forecast data from Google Weather API
+        forecast_data = await self._fetch_forecast(
+            geo_location.latitude,
+            geo_location.longitude
+        )
+        
+        # Parse and format forecast data
+        forecasts = []
+        
+        # Google Weather API returns daily data
+        if "days" in forecast_data:
+            for day_data in forecast_data["days"][:5]:  # Get first 5 days
+                date = day_data.get("date", "")
+                
+                # Get condition info
+                condition = day_data.get("conditions", {})
+                condition_type = condition.get("conditionCode", "UNKNOWN")
+                description = condition.get("conditionDescription", "Unknown")
+                
+                # Get temperature data
+                temp_data = day_data.get("temperature", {})
+                temp_max = temp_data.get("max", {}).get("value", 0)
+                temp_min = temp_data.get("min", {}).get("value", 0)
+                
+                # Convert to Celsius and round
+                temp_max_c = round(temp_max)
+                temp_min_c = round(temp_min)
+                
+                # Map to icon
+                icon = self._map_weather_icon(condition_type)
+                
+                forecasts.append({
+                    "date": date,
+                    "temp_max": temp_max_c,
+                    "temp_min": temp_min_c,
+                    "description": description,
+                    "icon": icon,
+                })
+        
+        return forecasts
+    
+    async def _fetch_forecast(self, lat: float, lng: float) -> dict:
+        """
+        Fetch weather forecast from Google Weather API.
+        
+        Args:
+            lat: Latitude
+            lng: Longitude
+            
+        Returns:
+            Raw forecast data dictionary
+            
+        Raises:
+            WeatherAPIError: If the API call fails
+        """
+        url = "https://weather.googleapis.com/v1/forecast:lookup"
+        
+        params = {
+            "key": self.api_key,
+            "location.latitude": lat,
+            "location.longitude": lng,
+            "unitsSystem": "METRIC",
+        }
+        
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.get(url, params=params)
+                response.raise_for_status()
+                return response.json()
+                
+        except httpx.TimeoutException:
+            logger.error(f"Forecast API timeout for coordinates: {lat}, {lng}")
+            raise WeatherAPIError("Forecast service timeout")
+        except httpx.HTTPStatusError as e:
+            logger.error(f"Forecast API HTTP error: {e.response.status_code}")
+            raise WeatherAPIError(f"Forecast service error: {e.response.status_code}")
+        except Exception as e:
+            logger.error(f"Unexpected forecast API error: {str(e)}")
+            raise WeatherAPIError(f"Failed to fetch forecast: {str(e)}")
+
     async def get_weather_by_coordinates(
         self, 
         latitude: float, 
