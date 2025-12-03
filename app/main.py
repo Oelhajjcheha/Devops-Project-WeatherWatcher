@@ -919,6 +919,7 @@ cityInput.addEventListener('focus', () => {
                 try {
                     showLoading();
                     hideError();
+                    hideAutocomplete();
                     
                     // Make API request to backend
                     const response = await fetch(`/api/weather?city=${encodeURIComponent(city)}`);
@@ -988,6 +989,7 @@ cityInput.addEventListener('focus', () => {
                 
                 // Show weather display with animation
                 weatherDisplay.classList.add('show');
+                cityInput.blur();
             }
             
             // ============================================
