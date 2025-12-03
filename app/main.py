@@ -48,6 +48,104 @@ else:
     # DISABLE Insights during tests (GitHub Actions)
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
+
+
+# -----------------------------------------------
+# Country Code to Name Mapping Dictionary
+# -----------------------------------------------
+# Task 154: Create country code mapping dictionary
+COUNTRY_CODE_MAP = {
+    "US": "United States",
+    "GB": "United Kingdom",
+    "CA": "Canada",
+    "AU": "Australia",
+    "DE": "Germany",
+    "FR": "France",
+    "IT": "Italy",
+    "ES": "Spain",
+    "NL": "Netherlands",
+    "BE": "Belgium",
+    "CH": "Switzerland",
+    "AT": "Austria",
+    "PT": "Portugal",
+    "IE": "Ireland",
+    "SE": "Sweden",
+    "NO": "Norway",
+    "DK": "Denmark",
+    "FI": "Finland",
+    "PL": "Poland",
+    "CZ": "Czech Republic",
+    "GR": "Greece",
+    "TR": "Turkey",
+    "RU": "Russia",
+    "UA": "Ukraine",
+    "RO": "Romania",
+    "BG": "Bulgaria",
+    "HR": "Croatia",
+    "RS": "Serbia",
+    "JP": "Japan",
+    "CN": "China",
+    "KR": "South Korea",
+    "IN": "India",
+    "ID": "Indonesia",
+    "TH": "Thailand",
+    "VN": "Vietnam",
+    "MY": "Malaysia",
+    "SG": "Singapore",
+    "PH": "Philippines",
+    "NZ": "New Zealand",
+    "BR": "Brazil",
+    "MX": "Mexico",
+    "AR": "Argentina",
+    "CL": "Chile",
+    "CO": "Colombia",
+    "PE": "Peru",
+    "VE": "Venezuela",
+    "ZA": "South Africa",
+    "EG": "Egypt",
+    "MA": "Morocco",
+    "NG": "Nigeria",
+    "KE": "Kenya",
+    "AE": "United Arab Emirates",
+    "SA": "Saudi Arabia",
+    "IL": "Israel",
+    "QA": "Qatar",
+    "KW": "Kuwait",
+}
+
+
+# -----------------------------------------------
+# Country Name Conversion Function
+# -----------------------------------------------
+# Task 155: Implement country name conversion function
+def convert_country_code_to_name(country_code: str) -> str:
+    """
+    Convert ISO 3166-1 alpha-2 country code to full country name.
+    
+    Args:
+        country_code: Two-letter country code (e.g., "US", "GB")
+        
+    Returns:
+        Full country name (e.g., "United States", "United Kingdom")
+        If code not found, returns the original code.
+    
+    Examples:
+        >>> convert_country_code_to_name("US")
+        'United States'
+        >>> convert_country_code_to_name("GB")
+        'United Kingdom'
+        >>> convert_country_code_to_name("XX")
+        'XX'
+    """
+    if not country_code:
+        return ""
+    
+    # Convert to uppercase for case-insensitive lookup
+    code = country_code.strip().upper()
+    
+    # Return full name if found, otherwise return the code itself
+    return COUNTRY_CODE_MAP.get(code, code)
+
     
 # -------------------------------------------
 # Custom Telemetry Helper
@@ -1081,7 +1179,7 @@ def debug_config():
 class WeatherResponse(BaseModel):
     """Response model for weather data."""
     city: str = Field(..., description="City name")
-    country: str = Field(..., description="Country code (ISO 3166-1 alpha-2)")
+    country: str = Field(..., description="Country name (converted from ISO 3166-1 alpha-2 code)")
     temperature: int = Field(..., description="Temperature in Celsius")
     feels_like: int = Field(..., description="Feels like temperature in Celsius")
     description: str = Field(..., description="Weather condition description")
@@ -1094,7 +1192,7 @@ class WeatherResponse(BaseModel):
         json_schema_extra = {
             "example": {
                 "city": "London",
-                "country": "GB",
+                "country": "United Kingdom",
                 "temperature": 15,
                 "feels_like": 14,
                 "description": "Partly cloudy",
@@ -1251,7 +1349,7 @@ async def _fetch_weather_for_city(city: str) -> dict:
         logger.warning(f"GOOGLE_MAPS_API_KEY not set. Returning mock data for: {city}")
         return {
             "city": city.title(),
-            "country": "US",
+            "country": convert_country_code_to_name("US"),  # Task 156: Convert country code to name
             "temperature": 22,
             "feels_like": 24,
             "description": "Clear sky (Mock Data)",
@@ -1269,9 +1367,10 @@ async def _fetch_weather_for_city(city: str) -> dict:
 
         logger.info(f"Successfully fetched weather for: {city}")
         
+        # Task 156: Update weather API responses - convert country code to full name
         return {
             "city": weather_data.city,
-            "country": weather_data.country,
+            "country": convert_country_code_to_name(weather_data.country),
             "temperature": weather_data.temperature,
             "feels_like": weather_data.feels_like,
             "description": weather_data.description,
