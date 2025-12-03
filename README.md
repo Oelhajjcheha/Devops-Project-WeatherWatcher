@@ -53,11 +53,25 @@ test deployment
 - _Scrum Master:_ [Adrian]
 - _Developers:_ [Jack Omar, Salmane]
 
+## Team - Sprint 2
+- **Product Owner:** Jack
+- **Scrum Master:** Salmane
+- **Developer 1 (Backend):** Omar
+- **Developer 2 (Frontend):** Adrian
+- **Developer 3 (Monitoring/Testing):** Kenny
+
+**Sprint Duration:** December 2-4, 2025 (3 days)  
+**Story Points:** 18 total
+
 ## Documentation
 
 - [Definition of Done](docs/definition-of-done.md)
-- [Sprint Planning](docs/sprints/sprint1-planning.md)
+- [Sprint 1 Planning](docs/sprints/sprint1-planning.md)
+- [Sprint 2 Planning](docs/sprints/sprint2-planning.md)
 - [Daily Scrum Notes](docs/sprints/daily-scrum-notes.md)
+- [Sprint 2 Daily Scrum](docs/sprints/sprint2-daily-scrum-notes.md)
+- [Sprint 2 Retrospective](docs/sprints/sprint2-retrospective.md)
+- [CI/CD Pipeline Documentation](docs/CI-CD-Pipeline-Documentation.md)
 
 ## Links
 
