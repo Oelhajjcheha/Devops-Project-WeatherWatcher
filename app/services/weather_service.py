@@ -25,7 +25,8 @@ logger = logging.getLogger(__name__)
 class WeatherData:
     """Structured weather data returned to the frontend."""
     city: str
-    country: str
+    country: str  # Country code for backward compatibility
+    country_name: str  # Full country name (e.g., "United Kingdom")
     temperature: int
     feels_like: int
     description: str
@@ -41,7 +42,8 @@ class GeoLocation:
     latitude: float
     longitude: float
     city: str
-    country: str
+    country: str  # Country code (e.g., "GB")
+    country_name: str = ""  # Full country name (e.g., "United Kingdom")
 
 
 # -----------------------------------------------
@@ -179,6 +181,7 @@ class WeatherService:
                 # Extract city and country from address components
                 city_name = city.title()
                 country_code = ""
+                country_name = ""  # Full country name from Google
                 
                 for component in result.get("address_components", []):
                     types = component.get("types", [])
@@ -187,13 +190,15 @@ class WeatherService:
                     elif "administrative_area_level_1" in types and not city_name:
                         city_name = component["long_name"]
                     elif "country" in types:
-                        country_code = component["short_name"]
+                        country_code = component["short_name"]  # e.g., "GB"
+                        country_name = component["long_name"]   # e.g., "United Kingdom"
                 
                 return GeoLocation(
                     latitude=location["lat"],
                     longitude=location["lng"],
                     city=city_name,
                     country=country_code,
+                    country_name=country_name,
                 )
                 
         except httpx.TimeoutException:
@@ -309,6 +314,7 @@ class WeatherService:
         return WeatherData(
             city=location.city,
             country=location.country,
+            country_name=location.country_name,  # Use Google's full country name
             temperature=round(temperature),
             feels_like=round(feels_like),
             description=description,
@@ -358,7 +364,8 @@ class WeatherService:
         latitude: float, 
         longitude: float,
         city_name: str = "Unknown",
-        country_code: str = ""
+        country_code: str = "",
+        country_name: str = ""
     ) -> WeatherData:
         """
         Get current weather conditions for specific coordinates.
@@ -368,6 +375,7 @@ class WeatherService:
             longitude: Location longitude
             city_name: Optional city name for display
             country_code: Optional country code for display
+            country_name: Optional full country name for display
             
         Returns:
             WeatherData with current conditions
@@ -379,6 +387,7 @@ class WeatherService:
             longitude=longitude,
             city=city_name,
             country=country_code,
+            country_name=country_name,
         )
         
         weather_data = await self._fetch_weather(latitude, longitude)

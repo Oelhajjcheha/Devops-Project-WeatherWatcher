@@ -54,6 +54,8 @@ else:
 # Country Code to Name Mapping Dictionary
 # -----------------------------------------------
 # Task 154: Create country code mapping dictionary
+# NOTE: This is only used as fallback for mock data when API key is not set.
+# Real weather data uses full country names directly from Google Geocoding API.
 COUNTRY_CODE_MAP = {
     "US": "United States",
     "GB": "United Kingdom",
@@ -1349,7 +1351,7 @@ async def _fetch_weather_for_city(city: str) -> dict:
         logger.warning(f"GOOGLE_MAPS_API_KEY not set. Returning mock data for: {city}")
         return {
             "city": city.title(),
-            "country": convert_country_code_to_name("US"),  # Task 156: Convert country code to name
+            "country": convert_country_code_to_name("US"),  # Fallback for mock data only
             "temperature": 22,
             "feels_like": 24,
             "description": "Clear sky (Mock Data)",
@@ -1367,10 +1369,10 @@ async def _fetch_weather_for_city(city: str) -> dict:
 
         logger.info(f"Successfully fetched weather for: {city}")
         
-        # Task 156: Update weather API responses - convert country code to full name
+        # Return weather data with full country name from Google's API
         return {
             "city": weather_data.city,
-            "country": convert_country_code_to_name(weather_data.country),
+            "country": weather_data.country_name,  # Use full name directly from Google
             "temperature": weather_data.temperature,
             "feels_like": weather_data.feels_like,
             "description": weather_data.description,
