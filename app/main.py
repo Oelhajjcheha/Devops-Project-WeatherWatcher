@@ -48,7 +48,24 @@ else:
     # DISABLE Insights during tests (GitHub Actions)
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
-
+    
+# -------------------------------------------
+# Custom Telemetry Helper
+# -------------------------------------------
+def track_weather_search(logger, city: str, success: bool, temperature: int = None):
+    """
+    Sends custom telemetry about weather searches.
+    """
+    logger.info(
+        "Weather search executed",
+        extra={
+            "custom_dimensions": {
+                "city": city,
+                "success": success,
+                "temperature": temperature
+            }
+        }
+    )
 
 # -----------------------------------------------
 # FastAPI App
@@ -845,11 +862,14 @@ def health_check():
 
 @app.get("/api/info")
 def get_info():
+    track_weather_search(logger, city="N/A", success=True)
+
     return {
         "project": "Weather Watcher",
         "sprint": 1,
-        "tech_stack": ["FastAPI", "Azure App Service", "Azure DevOps", "GitHub Actions"]
+        "tech_stack": ["FastAPI", "Azure App Service", "Azure DevOps"]
     }
+
 
 
 @app.get("/api/debug")
