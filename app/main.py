@@ -1341,7 +1341,28 @@ async def autocomplete_cities(
     
     if not api_key:
         logger.warning("GOOGLE_MAPS_API_KEY not set for autocomplete")
-        return {"suggestions": [{"city": f"{query.title()}", "country": "Mock", "display": f"{query.title()}, Mock"}]}
+
+        # ⭐ ADD THIS CUSTOM TELEMETRY ⭐
+        logger.info(
+            "Autocomplete executed",
+            extra={
+                "custom_dimensions": {
+                    "query": query,
+                    "success": True,
+                    "source": "mock"
+                }
+            }
+        )
+
+        return {
+            "suggestions": [
+                {
+                    "city": f"{query.title()}",
+                    "country": "Mock",
+                    "display": f"{query.title()}, Mock"
+                }
+            ]
+        }
     
     try:
         url = "https://maps.googleapis.com/maps/api/place/autocomplete/json"
@@ -1366,8 +1387,22 @@ async def autocomplete_cities(
                         "country": parts[-1],
                         "display": description
                     })
+                                        
+# telemetry for successful real autocomplete
+            logger.info(
+                "Autocomplete executed",
+                extra={
+                    "custom_dimensions": {
+                        "query": query,
+                        "success": True,
+                        "source": "google",
+                        "count": len(suggestions)
+                    }
+                }
+            )
             
             return {"suggestions": suggestions}
+
             
     except Exception as e:
         logger.error(f"Autocomplete error: {str(e)}")
