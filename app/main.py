@@ -728,6 +728,105 @@ def read_root():
     color: var(--text-secondary);
     font-size: 0.9rem;
 }
+/* ============================================
+               5-DAY FORECAST SECTION
+               ============================================ */
+            .forecast-section {
+                margin-top: 40px;
+                opacity: 0;
+                transform: translateY(20px);
+                transition: all 0.5s ease;
+            }
+
+            .forecast-section.show {
+                opacity: 1;
+                transform: translateY(0);
+                display: block !important;
+            }
+
+            .forecast-title {
+                font-size: 1.5rem;
+                color: var(--text-primary);
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .forecast-title i {
+                color: var(--accent);
+            }
+
+            .forecast-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 16px;
+            }
+
+            .forecast-card {
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                padding: 20px;
+                text-align: center;
+                transition: all 0.3s ease;
+                animation: fadeIn 0.5s ease;
+            }
+
+            .forecast-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 24px var(--shadow);
+                border-color: var(--accent);
+            }
+
+            .forecast-day {
+                font-size: 0.9rem;
+                color: var(--text-secondary);
+                margin-bottom: 8px;
+                font-weight: 500;
+            }
+
+            .forecast-icon {
+                font-size: 2.5rem;
+                margin: 12px 0;
+            }
+
+            .forecast-temps {
+                margin: 12px 0;
+            }
+
+            .forecast-temp-high {
+                font-size: 1.3rem;
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+            .forecast-temp-low {
+                font-size: 1rem;
+                color: var(--text-secondary);
+                margin-left: 8px;
+            }
+
+            .forecast-description {
+                font-size: 0.85rem;
+                color: var(--text-secondary);
+                margin-top: 8px;
+            }
+
+            @media (max-width: 768px) {
+                .forecast-container {
+                    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                    gap: 12px;
+                }
+                
+                .forecast-card {
+                    padding: 16px;
+                }
+                
+                .forecast-icon {
+                    font-size: 2rem;
+                }
+            }
 
         </style>
         </style>
@@ -811,6 +910,15 @@ def read_root():
                 </div>
             </section>
         </div>
+        <!-- 5-Day Forecast Section -->
+            <section class="forecast-section" id="forecastSection" style="display: none;">
+                <h2 class="forecast-title">
+                    <i class="fas fa-calendar-week"></i> 5-Day Forecast
+                </h2>
+                <div class="forecast-container" id="forecastContainer">
+                    <!-- Forecast cards will be inserted here by JavaScript -->
+                </div>
+            </section>
         
         <!-- JavaScript for weather functionality -->
         <script>
@@ -1096,7 +1204,67 @@ cityInput.addEventListener('focus', () => {
                 // Show weather display with animation
                 weatherDisplay.classList.add('show');
                 cityInput.blur();
+                fetchForecast(data.city);
             }
+
+            // ============================================
+        // FETCH AND DISPLAY FORECAST
+        // ============================================
+        async function fetchForecast(city) {
+            try {
+                const response = await fetch(`/api/forecast?city=${encodeURIComponent(city)}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch forecast');
+                }
+                
+                const data = await response.json();
+                displayForecast(data.forecasts);
+                
+            } catch (error) {
+                console.error('Forecast fetch error:', error);
+                document.getElementById('forecastSection').style.display = 'none';
+            }
+        }
+
+        function displayForecast(forecasts) {
+            const forecastSection = document.getElementById('forecastSection');
+            const forecastContainer = document.getElementById('forecastContainer');
+            
+            if (!forecasts || forecasts.length === 0) {
+                forecastSection.style.display = 'none';
+                return;
+            }
+            
+            forecastContainer.innerHTML = '';
+            
+            forecasts.forEach((forecast, index) => {
+                const card = document.createElement('div');
+                card.className = 'forecast-card';
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                const date = new Date(forecast.date);
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                const icon = getWeatherIcon(forecast.icon);
+                
+                card.innerHTML = `
+                    <div class="forecast-day">${dayName}</div>
+                    <div class="forecast-date">${monthDay}</div>
+                    <div class="forecast-icon">${icon}</div>
+                    <div class="forecast-temps">
+                        <span class="forecast-temp-high">${forecast.temp_max}°</span>
+                        <span class="forecast-temp-low">${forecast.temp_min}°</span>
+                    </div>
+                    <div class="forecast-description">${forecast.description}</div>
+                `;
+                
+                forecastContainer.appendChild(card);
+            });
+            
+            forecastSection.classList.add('show');
+        }
             
             // ============================================
             // FORM SUBMISSION HANDLER
