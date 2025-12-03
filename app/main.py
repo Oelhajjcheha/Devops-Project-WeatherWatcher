@@ -1545,8 +1545,8 @@ async def get_forecast(
     # Check if API key is configured
     api_key = os.getenv("GOOGLE_MAPS_API_KEY")
     
-    if not api_key:
-        logger.warning("GOOGLE_MAPS_API_KEY not set. Returning mock forecast data")
+    if True:  # Temporarily always use mock data until we fix Google API
+        logger.warning(f"Using mock forecast data for: {city}")
         # Return mock forecast data for development
         return {
             "city": city.title(),
