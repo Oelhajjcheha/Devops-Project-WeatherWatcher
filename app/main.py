@@ -826,7 +826,6 @@ cityInput.addEventListener('input', handleAutocomplete);
 cityInput.addEventListener('focus', () => {
     if (cityInput.value.trim().length >= 2) handleAutocomplete();
 });
-}); // End DOMContentLoaded for autocomplete
             // ============================================
             // WEATHER ICON MAPPING
             // Maps OpenWeatherMap icon codes to Font Awesome icons
@@ -856,9 +855,6 @@ cityInput.addEventListener('focus', () => {
             // DOM ELEMENTS
             // Get references to all interactive elements
             // ============================================
-            const weatherForm = document.getElementById('weatherForm');
-            const cityInput = document.getElementById('cityInput');
-            const searchButton = document.getElementById('searchButton');
             const weatherDisplay = document.getElementById('weatherDisplay');
             const loading = document.getElementById('loading');
             const errorMessage = document.getElementById('errorMessage');
@@ -1023,6 +1019,7 @@ cityInput.addEventListener('focus', () => {
                     weatherForm.dispatchEvent(new Event('submit'));
                 }
             });
+            }); // End DOMContentLoaded
         </script>
     </body>
     </html>
