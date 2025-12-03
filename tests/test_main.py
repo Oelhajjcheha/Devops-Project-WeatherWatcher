@@ -234,13 +234,15 @@ class TestWeatherService:
             latitude=51.5,
             longitude=-0.1,
             city="London",
-            country="GB"
+            country="GB",
+            country_name="United Kingdom"  # Add country_name
         )
         
         result = service._parse_weather_response(mock_response, location)
         
         assert result.city == "London"
         assert result.country == "GB"
+        assert result.country_name == "United Kingdom"  # Test country_name field
         assert result.temperature == 20  # rounded from 20.5
         assert result.feels_like == 19
         assert result.description == "Sunny"
@@ -263,6 +265,7 @@ class TestWeatherEndpointWithMockedAPI:
         mock_weather_data = WeatherData(
             city="Paris",
             country="FR",
+            country_name="France",  # Add country_name field
             temperature=18,
             feels_like=17,
             description="Partly cloudy",
@@ -284,7 +287,7 @@ class TestWeatherEndpointWithMockedAPI:
                 assert response.status_code == 200
                 data = response.json()
                 assert data["city"] == "Paris"
-                assert data["country"] == "FR"
+                assert data["country"] == "France"  # Now returns full country name
                 assert data["temperature"] == 18
     
     @pytest.mark.asyncio
