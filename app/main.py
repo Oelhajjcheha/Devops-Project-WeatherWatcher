@@ -1386,19 +1386,19 @@ async def autocomplete_cities(
                     })
                                         
 # telemetry for successful real autocomplete
-logger.info(
-    "Autocomplete executed",
-    extra={
-        "custom_dimensions": {
-            "query": query,
-            "success": True,
-            "source": "google",
-            "count": len(suggestions)
-        }
-    }
-)
-
-return {"suggestions": suggestions}
+            logger.info(
+                "Autocomplete executed",
+                extra={
+                    "custom_dimensions": {
+                        "query": query,
+                        "success": True,
+                        "source": "google",
+                        "count": len(suggestions)
+                    }
+                }
+            )
+            
+            return {"suggestions": suggestions}
 
             
     except Exception as e:
