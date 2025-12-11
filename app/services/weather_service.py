@@ -361,7 +361,7 @@ class WeatherService:
     
     async def get_forecast_by_city(self, city: str) -> list:
         """
-        Get 5-day weather forecast for a city.
+        Get 5-day weather forecast for a city using OpenWeatherMap API.
         
         Args:
             city: City name (e.g., "London", "Madrid")
@@ -373,89 +373,100 @@ class WeatherService:
             CityNotFoundError: If the city cannot be found
             WeatherAPIError: If the API call fails
         """
-        self._validate_api_key()
+        # Get OpenWeatherMap API key from environment
+        openweather_key = os.getenv("OPENWEATHER_API_KEY")
         
-        # First, geocode the city to get coordinates
-        geo_location = await self._geocode_city(city)
-        
-        # Fetch forecast data from Google Weather API
-        forecast_data = await self._fetch_forecast(
-            geo_location.latitude,
-            geo_location.longitude
-        )
-        
-        # Parse and format forecast data
-        forecasts = []
-        
-        # Google Weather API returns daily data
-        if "days" in forecast_data:
-            for day_data in forecast_data["days"][:5]:  # Get first 5 days
-                date = day_data.get("date", "")
-                
-                # Get condition info
-                condition = day_data.get("conditions", {})
-                condition_type = condition.get("conditionCode", "UNKNOWN")
-                description = condition.get("conditionDescription", "Unknown")
-                
-                # Get temperature data
-                temp_data = day_data.get("temperature", {})
-                temp_max = temp_data.get("max", {}).get("value", 0)
-                temp_min = temp_data.get("min", {}).get("value", 0)
-                
-                # Convert to Celsius and round
-                temp_max_c = round(temp_max)
-                temp_min_c = round(temp_min)
-                
-                # Map to icon
-                icon = self._map_weather_icon(condition_type)
-                
-                forecasts.append({
-                    "date": date,
-                    "temp_max": temp_max_c,
-                    "temp_min": temp_min_c,
-                    "description": description,
-                    "icon": icon,
-                })
-        
-        return forecasts
-    
-    async def _fetch_forecast(self, lat: float, lng: float) -> dict:
-        """
-        Fetch weather forecast from Google Weather API.
-        
-        Args:
-            lat: Latitude
-            lng: Longitude
-            
-        Returns:
-            Raw forecast data dictionary
-            
-        Raises:
-            WeatherAPIError: If the API call fails
-        """
-        url = "https://weather.googleapis.com/v1/forecast:lookup"
-        
-        params = {
-            "key": self.api_key,
-            "location.latitude": lat,
-            "location.longitude": lng,
-            "unitsSystem": "METRIC",
-        }
+        if not openweather_key:
+            logger.warning("OPENWEATHER_API_KEY not set, cannot fetch real forecast")
+            raise WeatherAPIError("OpenWeatherMap API key not configured")
         
         try:
+            # Call OpenWeatherMap 5-day forecast API directly with city name
+            url = "https://api.openweathermap.org/data/2.5/forecast"
+            params = {
+                "q": city,
+                "appid": openweather_key,
+                "units": "metric",
+                "cnt": 40  # Get 40 data points (5 days × 8 per day, 3-hour intervals)
+            }
+            
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.get(url, params=params)
                 response.raise_for_status()
-                return response.json()
+                data = response.json()
                 
-        except httpx.TimeoutException:
-            logger.error(f"Forecast API timeout for coordinates: {lat}, {lng}")
-            raise WeatherAPIError("Forecast service timeout")
+                if data.get("cod") != "200":
+                    if data.get("cod") == "404":
+                        raise CityNotFoundError(f"City not found: {city}")
+                    raise WeatherAPIError(f"OpenWeatherMap error: {data.get('message', 'Unknown error')}")
+                
+                # Parse forecast data - group by day and get min/max temps
+                forecasts = []
+                daily_data = {}
+                
+                # Group hourly forecasts by day
+                for item in data.get("list", []):
+                    # Get date (YYYY-MM-DD)
+                    dt_txt = item.get("dt_txt", "")
+                    if not dt_txt:
+                        continue
+                    
+                    date = dt_txt.split(" ")[0]
+                    
+                    if date not in daily_data:
+                        daily_data[date] = {
+                            "temps": [],
+                            "descriptions": [],
+                            "icons": []
+                        }
+                    
+                    # Collect temperature data
+                    temp = item.get("main", {}).get("temp", 0)
+                    daily_data[date]["temps"].append(temp)
+                    
+                    # Collect weather description (prefer midday data 12:00-15:00)
+                    hour = dt_txt.split(" ")[1] if " " in dt_txt else ""
+                    if hour in ["12:00:00", "15:00:00", "09:00:00"]:
+                        weather_info = item.get("weather", [{}])[0]
+                        daily_data[date]["descriptions"].append(
+                            weather_info.get("description", "").capitalize()
+                        )
+                        daily_data[date]["icons"].append(
+                            weather_info.get("icon", "01d")
+                        )
+                
+                # Create forecast for first 5 days
+                for date in sorted(daily_data.keys())[:5]:
+                    day = daily_data[date]
+                    
+                    # Get the best description (prefer midday, fallback to first)
+                    description = day["descriptions"][0] if day["descriptions"] else "Clear"
+                    icon = day["icons"][0] if day["icons"] else "01d"
+                    
+                    forecasts.append({
+                        "date": date,
+                        "temp_max": round(max(day["temps"])),
+                        "temp_min": round(min(day["temps"])),
+                        "description": description,
+                        "icon": icon,
+                    })
+                
+                return forecasts
+                
         except httpx.HTTPStatusError as e:
-            logger.error(f"Forecast API HTTP error: {e.response.status_code}")
-            raise WeatherAPIError(f"Forecast service error: {e.response.status_code}")
+            logger.error(f"OpenWeatherMap HTTP error: {e.response.status_code}")
+            if e.response.status_code == 404:
+                raise CityNotFoundError(f"City not found: {city}")
+            raise WeatherAPIError(f"Failed to fetch forecast: {e.response.status_code}")
+        except httpx.TimeoutException:
+            logger.error(f"OpenWeatherMap timeout for city: {city}")
+            raise WeatherAPIError("Forecast service timeout")
+        except CityNotFoundError:
+            raise  # Re-raise city not found errors
+        except WeatherAPIError:
+            raise  # Re-raise weather API errors
         except Exception as e:
-            logger.error(f"Unexpected forecast API error: {str(e)}")
+            logger.error(f"Forecast error for {city}: {str(e)}")
             raise WeatherAPIError(f"Failed to fetch forecast: {str(e)}")
 
     async def get_weather_by_coordinates(
