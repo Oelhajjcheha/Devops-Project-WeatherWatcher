@@ -459,6 +459,7 @@ def read_root():
                 opacity: 0;
                 animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
                 position: relative;
+                z-index: 100;
                 /* Removed overflow:hidden to allow dropdown to show */
             }
             
@@ -596,7 +597,7 @@ def read_root():
             .autocomplete-wrapper {
                 position: relative;
                 flex: 1;
-                z-index: 100;
+                z-index: 1000;
             }
             
             .autocomplete-dropdown {
@@ -609,7 +610,7 @@ def read_root():
                 border-radius: 16px;
                 max-height: 320px;
                 overflow-y: auto;
-                z-index: 9999;
+                z-index: 10000;
                 box-shadow: var(--shadow-lg), 0 0 0 1px rgba(56, 189, 248, 0.1);
                 display: none;
                 opacity: 0;
@@ -1194,11 +1195,17 @@ def read_root():
             }
             
             /* ============================================
-               5-DAY FORECAST SECTION - ENHANCED
+               5-DAY FORECAST SECTION - FULL WIDTH
                ============================================ */
             .forecast-section {
                 margin-top: 24px;
                 display: none;
+                width: 100vw;
+                position: relative;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 0 24px;
+                box-sizing: border-box;
             }
             
             .forecast-section.show {
@@ -1215,6 +1222,9 @@ def read_root():
                 font-weight: 600;
                 opacity: 0;
                 animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+                max-width: 1200px;
+                margin-left: auto;
+                margin-right: auto;
             }
             
             .forecast-title i {
@@ -1224,7 +1234,9 @@ def read_root():
             .forecast-container {
                 display: grid;
                 grid-template-columns: repeat(5, 1fr);
-                gap: 12px;
+                gap: 16px;
+                max-width: 1200px;
+                margin: 0 auto;
             }
             
             .forecast-card {
@@ -1306,6 +1318,12 @@ def read_root():
             .forecast-skeleton {
                 display: none;
                 margin-top: 24px;
+                width: 100vw;
+                position: relative;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 0 24px;
+                box-sizing: border-box;
             }
             
             .forecast-skeleton.show {
@@ -1317,12 +1335,17 @@ def read_root():
                 width: 180px;
                 height: 24px;
                 margin-bottom: 20px;
+                max-width: 1200px;
+                margin-left: auto;
+                margin-right: auto;
             }
             
             .forecast-skeleton-container {
                 display: grid;
                 grid-template-columns: repeat(5, 1fr);
-                gap: 12px;
+                gap: 16px;
+                max-width: 1200px;
+                margin: 0 auto;
             }
             
             .forecast-skeleton-card {
@@ -1434,7 +1457,7 @@ def read_root():
                 
                 .forecast-container {
                     grid-template-columns: repeat(5, 1fr);
-                    gap: 8px;
+                    gap: 12px;
                 }
                 
                 .forecast-card {
@@ -1449,6 +1472,10 @@ def read_root():
                 .forecast-skeleton-container {
                     grid-template-columns: repeat(5, 1fr);
                     gap: 8px;
+                }
+                
+                .forecast-section {
+                    padding: 0 16px;
                 }
             }
             
