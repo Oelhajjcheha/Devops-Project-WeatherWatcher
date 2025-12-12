@@ -20,11 +20,11 @@
 
 | Role                  | Name    | Responsibilities                                                          |
 | --------------------- | ------- | ------------------------------------------------------------------------- |
-| Product Owner         | Jack    | Prioritize backlog, define acceptance criteria, stakeholder communication |
-| Scrum Master          | Salmane | Facilitate ceremonies, remove blockers, ensure Scrum process              |
-| Developer 1           | Omar    | Backend development and API integration                                   |
+| Product Owner         | Omar    | Prioritize backlog, define acceptance criteria, stakeholder communication |
+| Scrum Master          | Kenny   | Facilitate ceremonies, remove blockers, ensure Scrum process              |
+| Developer 1           | Jack    | Backend development and API integration                                   |
 | Developer 2           | Adrian  | Frontend development and UI/UX                                            |
-| Developer 3           | Kenny   | Testing and monitoring enhancements                                       |
+| Developer 3           | Salmane | Testing and monitoring enhancements                                       |
 
 ---
 
@@ -74,224 +74,157 @@ Enhance Weather Watcher with advanced features, improve performance and reliabil
 
 ### Epic: Weather Watcher Enhancement
 
-**Total Story Points:** 20
+**Total Story Points:** 18
 
 ---
 
-### User Story #201: Complete 5-Day Forecast Integration
+### User Story #1: 5-Day Weather Forecast
 
-**Priority:** 1  
+**Priority:** 1 (Critical)  
 **Story Points:** 5  
-**Assigned To:** Developer 1 (Omar)
+**Assigned To:** Developer 1 (Jack Raja Shawki Samawi)  
+**Status:** ✅ Closed
 
 **Description:**  
 As a user, I want to see a 5-day weather forecast, so that I can plan my activities ahead of time.
 
 **Acceptance Criteria:**
 
-- [ ] OpenWeatherMap API key configured in Azure App Service
-- [ ] Forecast endpoint returns real data from OpenWeatherMap API
-- [ ] Forecast data properly formatted and displayed in frontend
-- [ ] Forecast shows daily high/low temperatures
-- [ ] Forecast shows weather conditions and icons for each day
-- [ ] Error handling for forecast API failures
-- [ ] Forecast updates when searching for a new city
+- [x] Forecast endpoint added to weather service
+- [x] /api/forecast API endpoint created
+- [x] Forecast UI layout designed
+- [x] Forecast display logic implemented
+- [x] Forecast cards styled
+- [x] Forecast functionality tested
 
 **Tasks:**
 
-1. Configure OPENWEATHER_API_KEY in Azure App Service (0.5h)
-2. Update forecast endpoint to use real OpenWeatherMap API (2h)
-3. Parse and format forecast data correctly (1.5h)
-4. Test forecast endpoint with various cities (1h)
-5. Update frontend to handle forecast errors gracefully (1h)
-6. Add unit tests for forecast service (1.5h)
-7. Document forecast API usage (0.5h)
+1. [x] Add forecast endpoint to weather service
+2. [x] Create /api/forecast API endpoint
+3. [x] Design forecast UI layout
+4. [x] Implement forecast display logic
+5. [x] Style forecast cards
+6. [x] Test forecast functionality
 
-**Total Estimated Time:** 8 hours
+**Total Estimated Time:** TBD
 
 ---
 
-### User Story #202: Enhance City Autocomplete
+### User Story #2: Full Country Names Display
 
-**Priority:** 1  
+**Priority:** 1 (Critical)  
 **Story Points:** 3  
-**Assigned To:** Developer 1 (Omar) - Shared with Developer 2 (Adrian)
+**Assigned To:** Developer 3 (Salmane Mouhib)  
+**Status:** ✅ Closed
 
 **Description:**  
-As a user, I want improved city autocomplete suggestions, so that I can quickly find and select cities.
+As a user, I want to see full country names instead of country codes, so that the information is more readable and user-friendly.
 
 **Acceptance Criteria:**
 
-- [ ] Autocomplete shows city and country in suggestions
-- [ ] Keyboard navigation (arrow keys, enter, escape) works smoothly
-- [ ] Autocomplete handles API errors gracefully
-- [ ] Suggestions are limited to 10 results
-- [ ] Autocomplete debouncing prevents excessive API calls
-- [ ] Loading state shown during autocomplete fetch
+- [x] Country code mapping dictionary created
+- [x] Country name conversion function implemented
+- [x] Weather API responses updated to include full country names
+- [x] Country name display tested
 
 **Tasks:**
 
-1. Enhance autocomplete endpoint response format (1h)
-2. Improve frontend autocomplete UI/UX (1.5h)
-3. Add keyboard navigation improvements (1h)
-4. Implement debouncing for autocomplete requests (0.5h)
-5. Add error handling for autocomplete failures (0.5h)
-6. Test autocomplete with various inputs (0.5h)
+1. [x] Create country code mapping dictionary
+2. [x] Implement country name conversion function
+3. [x] Update weather API responses
+4. [x] Test country name display
 
-**Total Estimated Time:** 5 hours
+**Total Estimated Time:** TBD
 
 ---
 
-### User Story #203: Application Insights Dashboard Enhancement
+### User Story #3: City Autocomplete & Search Improvements
 
-**Priority:** 2  
-**Story Points:** 3  
-**Assigned To:** Developer 3 (Kenny)
+**Priority:** 1 (Critical)  
+**Story Points:** 5  
+**Assigned To:** Developer 1 (Jack Raja Shawki Samawi)  
+**Status:** ✅ Closed
 
 **Description:**  
-As a developer, I want a comprehensive monitoring dashboard, so that I can track application health and performance.
+As a user, I want improved city autocomplete and search functionality, so that I can quickly find and select cities.
 
 **Acceptance Criteria:**
 
-- [ ] Custom dashboard created in Azure Application Insights
-- [ ] Dashboard shows weather API call metrics
-- [ ] Dashboard displays error rates and response times
-- [ ] Dashboard includes autocomplete usage metrics
-- [ ] Alerts configured for critical errors
-- [ ] Dashboard accessible to all team members
+- [x] Autocomplete approach researched and chosen
+- [x] Autocomplete API endpoint implemented
+- [x] Autocomplete JavaScript logic added
+- [x] Autocomplete dropdown styled
+- [x] Loading and error states added
+- [x] Autocomplete functionality tested
 
 **Tasks:**
 
-1. Create Application Insights dashboard (1.5h)
-2. Add custom metrics widgets (weather searches, API calls) (1.5h)
-3. Configure alerts for high error rates (1h)
-4. Add performance metrics (response times) (1h)
-5. Document dashboard setup and usage (0.5h)
-6. Share dashboard access with team (0.5h)
+1. [x] Research and choose autocomplete approach
+2. [x] Implement autocomplete API endpoint
+3. [x] Add autocomplete JavaScript logic
+4. [x] Style autocomplete dropdown
+5. [x] Add loading and error states
+6. [x] Test autocomplete functionality
 
-**Total Estimated Time:** 6 hours
+**Total Estimated Time:** TBD
 
 ---
 
-### User Story #204: Performance Optimization
+### User Story #4: Loading States & UI Polish
 
-**Priority:** 2  
+**Priority:** 2 (High)  
 **Story Points:** 3  
-**Assigned To:** Developer 1 (Omar)
+**Assigned To:** Developer 2 (Adrian Kia Rekaa Hasini Da Silva)  
+**Status:** 📋 New (Not Started)
 
 **Description:**  
-As a user, I want fast response times, so that I can get weather information quickly.
+As a user, I want smooth loading states and polished UI, so that the application feels professional and responsive.
 
 **Acceptance Criteria:**
 
-- [ ] API response times < 2 seconds for weather queries
-- [ ] Autocomplete response times < 500ms
-- [ ] Frontend loading states optimized
-- [ ] API calls are cached where appropriate
-- [ ] Rate limiting implemented to prevent abuse
-- [ ] Performance metrics tracked in Application Insights
+- [ ] Loading spinner component created
+- [ ] Skeleton loading screens added
+- [ ] Fade-in animations implemented
+- [ ] Button loading states added
+- [ ] Error message display improved
 
 **Tasks:**
 
-1. Analyze current performance bottlenecks (1h)
-2. Implement response caching for weather data (2h)
-3. Optimize API calls (parallel requests where possible) (1h)
-4. Add rate limiting to prevent abuse (1h)
-5. Monitor performance improvements (0.5h)
-6. Document performance optimizations (0.5h)
+1. [ ] Create loading spinner component
+2. [ ] Add skeleton loading screens
+3. [ ] Implement fade-in animations
+4. [ ] Add button loading states
+5. [ ] Improve error message display
 
-**Total Estimated Time:** 6 hours
-
----
-
-### User Story #205: Enhanced Error Handling and Resilience
-
-**Priority:** 2  
-**Story Points:** 3  
-**Assigned To:** Developer 1 (Omar) - Shared with Developer 3 (Kenny)
-
-**Description:**  
-As a user, I want reliable error handling, so that I understand what went wrong and can retry when appropriate.
-
-**Acceptance Criteria:**
-
-- [ ] Retry logic for transient API failures
-- [ ] Clear error messages for different error types
-- [ ] Graceful degradation when APIs are unavailable
-- [ ] Error logging to Application Insights
-- [ ] User-friendly error messages in frontend
-- [ ] Retry button functionality works correctly
-
-**Tasks:**
-
-1. Implement retry logic with exponential backoff (2h)
-2. Improve error messages for different scenarios (1h)
-3. Add graceful degradation for API failures (1.5h)
-4. Enhance error logging with context (1h)
-5. Update frontend error handling (1h)
-6. Test error scenarios thoroughly (1h)
-
-**Total Estimated Time:** 7.5 hours
+**Total Estimated Time:** TBD
 
 ---
 
-### User Story #206: Test Coverage and Quality Assurance
+### User Story #5: Sprint 3 Documentation
 
-**Priority:** 2  
-**Story Points:** 3  
-**Assigned To:** Developer 3 (Kenny)
-
-**Description:**  
-As a developer, I want comprehensive test coverage, so that I can ensure code quality and catch bugs early.
-
-**Acceptance Criteria:**
-
-- [ ] Test coverage > 85% for all modules
-- [ ] Integration tests for all API endpoints
-- [ ] Edge cases and error scenarios tested
-- [ ] Async tests properly configured and passing
-- [ ] Test coverage report generated in CI pipeline
-- [ ] All tests passing in CI/CD pipeline
-
-**Tasks:**
-
-1. Fix async test configuration issues (1.5h)
-2. Add integration tests for forecast endpoint (1.5h)
-3. Add tests for autocomplete edge cases (1h)
-4. Add tests for error handling scenarios (1.5h)
-5. Generate and review coverage report (0.5h)
-6. Update CI pipeline with coverage reporting (1h)
-
-**Total Estimated Time:** 7 hours
-
----
-
-### User Story #207: Documentation and Architecture Updates
-
-**Priority:** 3  
+**Priority:** 2 (High)  
 **Story Points:** 2  
-**Assigned To:** Scrum Master (Salmane)
+**Assigned To:** Scrum Master (Kenny Tohme)  
+**Status:** 🔄 Active (In Progress)
 
 **Description:**  
-As a team member, I want up-to-date documentation, so that I can understand the system architecture and contribute effectively.
+As a team member, I want comprehensive Sprint 3 documentation, so that all stakeholders understand our progress and the project is properly documented.
 
 **Acceptance Criteria:**
 
-- [ ] Architecture diagram updated with all components
-- [ ] API documentation complete
-- [ ] README updated with all features
-- [ ] Deployment guide updated
-- [ ] Sprint 3 documentation complete
+- [x] Sprint 3 Planning Document created
+- [x] README updated with new features
+- [x] Architecture diagram created/updated
+- [ ] Sprint 3 retrospective completed
 
 **Tasks:**
 
-1. Update architecture diagram (1.5h)
-2. Update README with Sprint 3 features (1h)
-3. Document API endpoints and usage (1h)
-4. Update deployment documentation (0.5h)
-5. Create Sprint 3 retrospective (1h)
+1. [x] Create Sprint 3 Planning Document
+2. [x] Update README with new features
+3. [x] Create or update architecture diagram
+4. [ ] Write Sprint 3 retrospective
 
-**Total Estimated Time:** 5 hours
+**Total Estimated Time:** TBD
 
 ---
 
@@ -299,14 +232,14 @@ As a team member, I want up-to-date documentation, so that I can understand the 
 
 | User Story                              | Story Points | Status      | Assignee |
 | --------------------------------------- | ------------ | ----------- | -------- |
-| Complete 5-Day Forecast Integration      | 5            | Not Started | Omar     |
-| Enhance City Autocomplete                | 3            | Not Started | Omar/Adrian |
-| Application Insights Dashboard           | 3            | Not Started | Kenny    |
-| Performance Optimization                 | 3            | Not Started | Omar     |
-| Enhanced Error Handling                 | 3            | Not Started | Omar/Kenny |
-| Test Coverage and QA                    | 3            | Not Started | Kenny    |
-| Documentation Updates                   | 2            | Not Started | Salmane  |
-| **TOTAL**                               | **22**       | **0/22 Done** |        |
+| 5-Day Weather Forecast                  | 5            | ✅ Closed   | Jack     |
+| Full Country Names Display              | 3            | ✅ Closed   | Salmane  |
+| City Autocomplete & Search Improvements | 5            | ✅ Closed   | Jack     |
+| Loading States & UI Polish              | 3            | 📋 New     | Adrian   |
+| Sprint 3 Documentation                  | 2            | 🔄 Active  | Kenny    |
+| **TOTAL**                               | **18**       | **3/5 Complete (13 SP)** |        |
+
+**Completion Rate:** 72% (13 out of 18 story points completed)
 
 ---
 
@@ -363,7 +296,7 @@ As a team member, I want up-to-date documentation, so that I can understand the 
 - **Duration:** 1.5 hours
 - **Outcomes:**
   - Sprint goal defined
-  - User stories selected and estimated (22 story points total)
+  - User stories selected and estimated (18 story points total)
   - Tasks broken down and time-boxed for 4-day sprint
   - Team members assigned
 
@@ -430,19 +363,54 @@ As a team member, I want up-to-date documentation, so that I can understand the 
 
 ---
 
+## Kanban Board and Work Item Tracking
+
+### Azure DevOps Boards
+
+All Sprint 3 work items are tracked using **Azure DevOps Boards** with the following workflow:
+
+**Board States:**
+- **Backlog** → **To Do** → **In Progress** → **Review** → **Done**
+
+**Board URL:** [Azure DevOps Boards](https://dev.azure.com/adasilvaieu2023/devops%20group%20project%20Adrian/_boards/board/t/)
+
+**Work Item Types:**
+- User Stories (Epic level)
+- Tasks (Story level)
+- Bugs (if any)
+
+**Board Columns:**
+1. **Backlog:** All Sprint 3 user stories
+2. **To Do:** Stories ready to start
+3. **In Progress:** Stories currently being worked on
+4. **Review:** Stories ready for code review
+5. **Done:** Completed stories
+
+**Daily Updates:**
+- Team members update work items during daily standups
+- Move items between columns as work progresses
+- Link commits and pull requests to work items
+
+**Burndown Tracking:**
+- Sprint burndown chart automatically generated from board
+- Shows remaining story points over time
+- Helps identify if sprint is on track
+
+---
+
 ## Branch Strategy
 
 ### Git Workflow (Continued from Sprint 2)
 
 - **Main Branch:** Always deployable, protected
 - **Feature Branches:** Created for each developer's work
-  - `feature/forecast-integration` (Omar)
-  - `feature/autocomplete-enhancement` (Omar/Adrian)
-  - `feature/monitoring-dashboard` (Kenny)
-  - `feature/performance-optimization` (Omar)
-  - `feature/error-handling` (Omar/Kenny)
-  - `feature/test-coverage` (Kenny)
-  - `feature/sprint3-docs` (Salmane)
+  - `feature/forecast-integration` (Jack)
+  - `feature/autocomplete-enhancement` (Jack/Adrian)
+  - `feature/monitoring-dashboard` (Salmane)
+  - `feature/performance-optimization` (Jack)
+  - `feature/error-handling` (Jack/Salmane)
+  - `feature/test-coverage` (Salmane)
+  - `feature/sprint3-docs` (Kenny)
 - **Pull Requests:** Required for merging to main
 - **Code Reviews:** Minimum 1 approval required
 - **CI Pipeline:** Must pass before merge
@@ -527,14 +495,14 @@ A User Story is considered **DONE** when:
 
 ## Sprint Burndown Chart
 
-**Target Velocity:** 22 story points
+**Target Velocity:** 18 story points
 
 | Day                | Story Points Completed | Story Points Remaining |
 | ------------------ | ---------------------- | ---------------------- |
-| Dec 5 (Start)      | 0                      | 22                     |
+| Dec 5 (Start)      | 0                      | 18                     |
 | Dec 6              | TBD                    | TBD                    |
 | Dec 7              | TBD                    | TBD                    |
-| Dec 8 (End/Demo)   | TBD                    | 0 (Goal)               |
+| Dec 8 (End/Demo)   | 13                     | 5 (3 SP carry-over)    |
 
 ---
 
@@ -572,6 +540,6 @@ A User Story is considered **DONE** when:
 ---
 
 **Document Created:** December 5, 2025  
-**Created By:** Salmane Mouhib (Scrum Master)  
+**Created By:** Kenny Tohme (Scrum Master)  
 **Last Updated:** December 5, 2025
 

@@ -114,11 +114,11 @@ test deployment
 
 ### Current Team (Sprint 3)
 
-- **Product Owner:** Jack
-- **Scrum Master:** Salmane
-- **Developer 1 (Backend/API):** Omar
+- **Product Owner:** Omar
+- **Scrum Master:** Kenny
+- **Developer 1 (Backend/API):** Jack
 - **Developer 2 (Frontend):** Adrian
-- **Developer 3 (Monitoring/Testing):** Kenny
+- **Developer 3 (Monitoring/Testing):** Salmane
 
 ### Sprint History
 
@@ -129,6 +129,7 @@ test deployment
 ## Documentation
 
 ### Project Documentation
+- [Product Backlog](docs/product-backlog.md)
 - [Definition of Done](docs/definition-of-done.md)
 - [Architecture Documentation](docs/architecture.md)
 - [CI/CD Pipeline Documentation](docs/CI-CD-Pipeline-Documentation.md)
