@@ -251,6 +251,11 @@ The Weather Watcher application follows a cloud-native architecture:
 **Pipeline URL:**  
 https://github.com/Oelhajjcheha/Devops-Project-WeatherWatcher/actions
 
+**Azure DevOps URL:**
+https://dev.azure.com/adasilvaieu2023/devops%20group%20project%20Adrian
+
+**GitHub URL:**
+https://github.com/Oelhajjcheha/Devops-Project-WeatherWatcher.git
 ---
 
 ### Additional Azure resources created automatically:
