@@ -2612,15 +2612,14 @@ def read_root():
                     displayWeather(data);
                     showSuccessToast();
                     
-                // Show weather display
-                weatherDisplay.classList.add('show');
+                    // Show weather display
+                    weatherDisplay.classList.add('show');
             
-                // Display clothing recommendations
-                displayClothingRecommendations(data.temperature, data.description, data.wind_speed);
+                    // Display clothing recommendations
+                    displayClothingRecommendations(data.temperature, data.description, data.wind_speed);
             
-                // Fetch and display 5-day forecast
-                fetchForecast(data.city);
-        }
+                    // Fetch and display 5-day forecast
+                    fetchForecast(data.city);
                     
                 } catch (error) {
                     console.error('Weather fetch error:', error);
