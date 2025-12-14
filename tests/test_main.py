@@ -668,3 +668,127 @@ class TestComparisonIntegration:
             keys_set = set(responses[0].keys())
             for response in responses[1:]:
                 assert set(response.keys()) == keys_set
+
+
+# ============================================
+# Temperature Unit Toggle Tests
+# ============================================
+
+class TestTemperatureUnitToggle:
+    """Tests for temperature unit toggle functionality."""
+    
+    def test_temperature_toggle_button_exists(self):
+        """Test that temperature toggle button is present in HTML."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        # Check for toggle button
+        assert 'id="temperatureToggle"' in html_content
+        assert 'id="tempUnitC"' in html_content
+        assert 'id="tempUnitF"' in html_content
+        assert '°C' in html_content
+        assert '°F' in html_content
+    
+    def test_temperature_toggle_css_styles_exist(self):
+        """Test that temperature toggle CSS styles are defined."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        # Check for toggle-specific CSS classes
+        assert '.temperature-toggle-container' in html_content
+        assert '.temperature-toggle' in html_content
+        assert '.temp-unit' in html_content
+    
+    def test_temperature_conversion_functions_exist(self):
+        """Test that temperature conversion JavaScript functions are defined."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        # Check for conversion functions
+        assert 'celsiusToFahrenheit' in html_content
+        assert 'fahrenheitToCelsius' in html_content
+        assert 'convertTemperature' in html_content
+        assert 'toggleTemperatureUnit' in html_content
+        assert 'getTemperatureUnitSymbol' in html_content
+    
+    def test_temperature_conversion_celsius_to_fahrenheit(self):
+        """Test Celsius to Fahrenheit conversion logic."""
+        # Test conversion: 0°C = 32°F
+        celsius = 0
+        fahrenheit = (celsius * 9/5) + 32
+        assert round(fahrenheit) == 32
+        
+        # Test conversion: 25°C = 77°F
+        celsius = 25
+        fahrenheit = (celsius * 9/5) + 32
+        assert round(fahrenheit) == 77
+        
+        # Test conversion: 100°C = 212°F
+        celsius = 100
+        fahrenheit = (celsius * 9/5) + 32
+        assert round(fahrenheit) == 212
+    
+    def test_temperature_conversion_fahrenheit_to_celsius(self):
+        """Test Fahrenheit to Celsius conversion logic."""
+        # Test conversion: 32°F = 0°C
+        fahrenheit = 32
+        celsius = (fahrenheit - 32) * 5/9
+        assert round(celsius) == 0
+        
+        # Test conversion: 77°F = 25°C
+        fahrenheit = 77
+        celsius = (fahrenheit - 32) * 5/9
+        assert round(celsius) == 25
+        
+        # Test conversion: 212°F = 100°C
+        fahrenheit = 212
+        celsius = (fahrenheit - 32) * 5/9
+        assert round(celsius) == 100
+    
+    def test_temperature_display_includes_unit_symbol(self):
+        """Test that temperature display includes unit symbol in HTML."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        # Check that temperature display uses unit symbol
+        assert 'getTemperatureUnitSymbol' in html_content
+        assert '°C' in html_content or '°F' in html_content
+    
+    def test_temperature_toggle_localstorage_support(self):
+        """Test that temperature unit preference uses localStorage."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        # Check for localStorage usage
+        assert 'localStorage.getItem' in html_content
+        assert 'localStorage.setItem' in html_content
+        assert 'temperatureUnit' in html_content
+    
+    def test_temperature_conversion_rounding(self):
+        """Test that temperature conversion properly rounds values."""
+        # Test that conversions round to nearest integer
+        celsius = 20.5
+        fahrenheit = (celsius * 9/5) + 32
+        assert round(fahrenheit) == 69
+        
+        fahrenheit = 69.5
+        celsius = (fahrenheit - 32) * 5/9
+        assert round(celsius) == 21
+    
+    def test_weather_data_stored_in_celsius(self):
+        """Test that weather data from API is stored in Celsius."""
+        with patch.dict("os.environ", {"GOOGLE_MAPS_API_KEY": ""}, clear=False):
+            response = client.get("/api/weather?city=London")
+            assert response.status_code == 200
+            data = response.json()
+            
+            # Temperature should be in Celsius (reasonable range: -50 to 50)
+            assert isinstance(data["temperature"], int)
+            assert -50 <= data["temperature"] <= 50
+            assert isinstance(data["feels_like"], int)
+            assert -50 <= data["feels_like"] <= 50

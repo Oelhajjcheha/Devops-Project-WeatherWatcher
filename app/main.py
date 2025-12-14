@@ -349,6 +349,61 @@ def read_root():
                 animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
             }
             
+            /* Temperature Unit Toggle */
+            .temperature-toggle-container {
+                margin-top: 20px;
+                display: flex;
+                justify-content: center;
+                opacity: 0;
+                animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+            }
+            
+            .temperature-toggle {
+                display: flex;
+                align-items: center;
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 4px;
+                gap: 0;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: var(--shadow-sm);
+                position: relative;
+            }
+            
+            .temperature-toggle:hover {
+                box-shadow: var(--shadow-md);
+                border-color: var(--accent);
+            }
+            
+            .temperature-toggle:focus {
+                outline: 2px solid var(--accent);
+                outline-offset: 2px;
+            }
+            
+            .temp-unit {
+                padding: 8px 16px;
+                font-size: 0.95rem;
+                font-weight: 600;
+                color: var(--text-secondary);
+                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                border-radius: 8px;
+                user-select: none;
+                position: relative;
+                z-index: 1;
+            }
+            
+            .temp-unit.active {
+                color: var(--text-primary);
+                background: var(--accent-gradient);
+                box-shadow: var(--shadow-sm);
+            }
+            
+            .temp-unit:not(.active):hover {
+                color: var(--text-primary);
+            }
+            
             /* ============================================
                ANIMATIONS - CORE
                ============================================ */
@@ -1884,6 +1939,13 @@ def read_root():
             <header>
                 <h1><i class="fas fa-cloud-sun"></i> Weather Watcher</h1>
                 <p class="subtitle">Real-time weather at your fingertips</p>
+                <!-- Temperature Unit Toggle -->
+                <div class="temperature-toggle-container">
+                    <button class="temperature-toggle" id="temperatureToggle" aria-label="Toggle temperature unit">
+                        <span class="temp-unit active" id="tempUnitC">°C</span>
+                        <span class="temp-unit" id="tempUnitF">°F</span>
+                    </button>
+                </div>
             </header>
             
             <!-- Search form section -->
@@ -2103,6 +2165,86 @@ def read_root():
             let loadingInterval = null;
             let currentWeatherData = null;
             let comparisonCities = [];
+            
+            // Temperature unit management
+            const temperatureToggle = document.getElementById('temperatureToggle');
+            const tempUnitC = document.getElementById('tempUnitC');
+            const tempUnitF = document.getElementById('tempUnitF');
+            
+            // Get unit from localStorage or default to Celsius
+            let temperatureUnit = localStorage.getItem('temperatureUnit') || 'C';
+            
+            // Initialize toggle state
+            function initializeTemperatureToggle() {
+                if (temperatureUnit === 'F') {
+                    tempUnitC.classList.remove('active');
+                    tempUnitF.classList.add('active');
+                } else {
+                    tempUnitC.classList.add('active');
+                    tempUnitF.classList.remove('active');
+                }
+            }
+            
+            // Temperature conversion functions
+            function celsiusToFahrenheit(celsius) {
+                return Math.round((celsius * 9/5) + 32);
+            }
+            
+            function fahrenheitToCelsius(fahrenheit) {
+                return Math.round((fahrenheit - 32) * 5/9);
+            }
+            
+            // Convert temperature based on current unit
+            function convertTemperature(celsius) {
+                if (temperatureUnit === 'F') {
+                    return celsiusToFahrenheit(celsius);
+                }
+                return celsius;
+            }
+            
+            // Get temperature unit symbol
+            function getTemperatureUnitSymbol() {
+                return temperatureUnit === 'F' ? '°F' : '°C';
+            }
+            
+            // Toggle temperature unit
+            function toggleTemperatureUnit() {
+                temperatureUnit = temperatureUnit === 'C' ? 'F' : 'C';
+                localStorage.setItem('temperatureUnit', temperatureUnit);
+                
+                // Update toggle button appearance
+                if (temperatureUnit === 'F') {
+                    tempUnitC.classList.remove('active');
+                    tempUnitF.classList.add('active');
+                } else {
+                    tempUnitC.classList.add('active');
+                    tempUnitF.classList.remove('active');
+                }
+                
+                // Update all displayed temperatures
+                if (currentWeatherData) {
+                    displayWeather(currentWeatherData);
+                }
+                
+                // Update forecast if displayed
+                if (forecastSection.classList.contains('show')) {
+                    const city = currentCity || currentWeatherData?.city;
+                    if (city) {
+                        fetchForecast(city);
+                    }
+                }
+                
+                // Update comparison view if there are cities
+                if (comparisonCities.length > 0) {
+                    updateComparisonView();
+                }
+            }
+            
+            // Initialize on page load
+            initializeTemperatureToggle();
+            
+            // Add event listener for toggle button
+            temperatureToggle.addEventListener('click', toggleTemperatureUnit);
             
             // ============================================
             // WEATHER ICON MAPPING
@@ -2418,12 +2560,17 @@ def read_root():
                 // Store current weather data for comparison
                 currentWeatherData = data;
                 
+                // Convert temperatures based on selected unit
+                const displayTemp = convertTemperature(data.temperature);
+                const displayFeelsLike = convertTemperature(data.feels_like);
+                const unitSymbol = getTemperatureUnitSymbol();
+                
                 weatherCity.textContent = data.city;
                 weatherCountryText.textContent = data.country || '';
                 weatherIcon.innerHTML = getWeatherIcon(data.icon);
-                weatherTemp.textContent = `${data.temperature}°C`;
+                weatherTemp.textContent = `${displayTemp}${unitSymbol}`;
                 weatherDescription.textContent = data.description;
-                weatherFeelsLikeText.textContent = `Feels like ${data.feels_like}°C`;
+                weatherFeelsLikeText.textContent = `Feels like ${displayFeelsLike}${unitSymbol}`;
                 weatherHumidity.textContent = `${data.humidity}%`;
                 weatherWind.textContent = `${data.wind_speed} m/s`;
                 weatherPressure.textContent = `${data.pressure} hPa`;
@@ -2481,6 +2628,8 @@ def read_root():
                 
                 forecastContainer.innerHTML = '';
                 
+                const unitSymbol = getTemperatureUnitSymbol();
+                
                 forecasts.forEach((forecast, index) => {
                     const card = document.createElement('div');
                     card.className = 'forecast-card';
@@ -2496,13 +2645,17 @@ def read_root():
                     
                     const icon = getWeatherIcon(forecast.icon);
                     
+                    // Convert forecast temperatures
+                    const displayTempMax = convertTemperature(forecast.temp_max);
+                    const displayTempMin = convertTemperature(forecast.temp_min);
+                    
                     card.innerHTML = `
                         <div class="forecast-day">${dayName}</div>
                         <div class="forecast-date">${monthDay}</div>
                         <div class="forecast-icon">${icon}</div>
                         <div class="forecast-temps">
-                            <span class="forecast-temp-high">${forecast.temp_max}°</span>
-                            <span class="forecast-temp-low">${forecast.temp_min}°</span>
+                            <span class="forecast-temp-high">${displayTempMax}${unitSymbol}</span>
+                            <span class="forecast-temp-low">${displayTempMin}${unitSymbol}</span>
                         </div>
                         <div class="forecast-description">${forecast.description}</div>
                     `;
@@ -2590,18 +2743,23 @@ def read_root():
                     return;
                 }
                 
-                // Find warmest and coldest
+                // Find warmest and coldest (using Celsius values for comparison logic)
                 const temps = comparisonCities.map(c => c.temperature);
                 const maxTemp = Math.max(...temps);
                 const minTemp = Math.min(...temps);
                 const avgTemp = temps.reduce((a, b) => a + b, 0) / temps.length;
+                
+                const unitSymbol = getTemperatureUnitSymbol();
                 
                 // Render comparison cards
                 comparisonCities.forEach((city, index) => {
                     const card = document.createElement('div');
                     card.className = 'comparison-card';
                     
-                    // Add best/worst temp classes
+                    // Convert temperature for display
+                    const displayTemp = convertTemperature(city.temperature);
+                    
+                    // Add best/worst temp classes (using Celsius for comparison)
                     if (city.temperature === maxTemp && comparisonCities.length > 1) {
                         card.classList.add('best-temp');
                     }
@@ -2612,7 +2770,7 @@ def read_root():
                     // Get weather icon
                     const iconClass = weatherIconMap[city.icon] || 'fa-cloud';
                     
-                    // Temperature indicator
+                    // Temperature indicator (using Celsius for comparison)
                     let tempIndicator = '';
                     if (comparisonCities.length > 1) {
                         if (city.temperature > avgTemp) {
@@ -2646,7 +2804,7 @@ def read_root():
                         </div>
                         <div class="comparison-icon"><i class="fas ${iconClass}"></i></div>
                         <div class="comparison-temp">
-                            ${city.temperature}°
+                            ${displayTemp}${unitSymbol}
                             ${tempIndicator}
                         </div>
                         <div class="comparison-description">${city.description}</div>
