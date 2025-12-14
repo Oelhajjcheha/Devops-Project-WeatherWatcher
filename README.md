@@ -1,175 +1,190 @@
 # Weather Watcher
 
-Cloud-native web application built with FastAPI and deployed on Microsoft Azure. Get real-time weather information and 5-day forecasts for any city worldwide.
+Weather Watcher is a cloud-native web application developed as part of the **BCSAI-SDDO DevOps course** at IE University.  
+The project demonstrates the design, deployment, monitoring, and documentation of a modern DevOps-enabled application using cloud services and automated CI/CD practices.
 
-## Project Overview
+The application provides weather information for cities worldwide, enhanced with autocomplete search, monitoring, and observability.
 
-Weather Watcher is a modern, responsive web application that provides:
-- **Real-time weather data** for any city
-- **5-day weather forecast** with daily high/low temperatures
-- **City autocomplete** for quick city search
-- **Beautiful dark-themed UI** with responsive design
-- **Comprehensive monitoring** with Azure Application Insights
+---
 
-## Sprint Goals
+## Project Goals
 
-- **Sprint 1:** Deploy a working application to Azure with automated CI/CD pipeline ✅
-- **Sprint 2:** Implement core weather functionality and enhance monitoring capabilities ✅
-- **Sprint 3:** Enhance user experience, improve reliability, and add advanced features 🔄
+- Build a cloud-deployed web application using modern DevOps practices
+- Implement automated CI/CD pipelines
+- Ensure monitoring, logging, and observability
+- Apply Scrum methodology across multiple sprints
+- Deliver a clean, professional, and production-ready project
 
-## Tech Stack
-
-**Backend:**
-- FastAPI (Python 3.11)
-- Uvicorn/Gunicorn
-- Pytest for testing
-- OpenCensus for telemetry
-
-**Frontend:**
-- Vanilla JavaScript
-- Modern CSS with dark theme
-- Responsive design (mobile-first)
-- Font Awesome icons
-
-**Cloud & DevOps:**
-- Microsoft Azure App Service
-- Azure DevOps Pipelines (CI/CD)
-- Azure Application Insights
-- Azure Log Analytics
-
-**APIs:**
-- Google Maps Weather API (current conditions)
-- Google Places API (autocomplete)
-- OpenWeatherMap API (5-day forecast)
-
-## Local Setup
-
-### 1. Clone the repository
-
-bash
-git clone <your-repo-url>
-cd weather-watcher
-
-### 2. Install dependencies
-
-bash
-python -m venv venv
-source venv/bin/activate # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-
-### 3. Run the app
-
-bash
-uvicorn app.main:app --reload
-
-Open http://localhost:8000 in your browser.
-
-### 4. Run tests
-
-bash
-pytest tests/ -v
-test deployment
+---
 
 ## Features
 
-### ✅ Sprint 2 Features (Completed)
+- 🌤️ Current weather information by city  
+- 📅 5-day weather forecast  
+- 🔍 City autocomplete using Google Places API (with mock fallback)  
+- 🔄 Temperature unit toggle (Celsius / Fahrenheit)  
+- 📊 Weather comparison between cities  
+- ❤️ Health check endpoint for monitoring  
+- 📈 Application Insights telemetry and logging  
+- 🚀 Automated CI/CD pipeline with GitHub Actions  
 
-- **Weather Search:** Search for weather by city name
-- **Real-time Weather Data:** Current temperature, conditions, humidity, wind speed, pressure
-- **City Autocomplete:** Smart city suggestions as you type
-- **Modern UI:** Dark-themed, responsive design with smooth animations
-- **Error Handling:** User-friendly error messages with retry functionality
-- **Application Insights:** Custom telemetry and logging
-- **Country Name Display:** Full country names instead of codes
+---
 
-### 🔄 Sprint 3 Features (In Progress)
+## Architecture Overview
 
-- **5-Day Forecast:** Extended weather forecast with daily predictions
-- **Enhanced Autocomplete:** Improved keyboard navigation and UX
-- **Performance Optimization:** Caching and response time improvements
-- **Monitoring Dashboard:** Comprehensive Application Insights dashboard
-- **Enhanced Error Handling:** Retry logic and graceful degradation
-- **Test Coverage:** >85% test coverage with comprehensive test suite
+The system follows a cloud-native architecture:
+
+- Frontend: HTML, CSS, JavaScript  
+- Backend: FastAPI (Python 3.11)  
+- External APIs: OpenWeatherMap, Google Places API  
+- Cloud Platform: Microsoft Azure  
+- Hosting: Azure App Service (Linux, Free Tier)  
+- CI/CD: GitHub Actions  
+- Monitoring: Azure Application Insights  
+
+The application is deployed automatically through a CI/CD pipeline and monitored using dashboards, logs, and alerts.
+
+---
+
+## Technology Stack
+
+Backend:
+- Python 3.11
+- FastAPI
+- Uvicorn
+
+Frontend:
+- HTML
+- CSS
+- JavaScript
+
+Cloud & DevOps:
+- Microsoft Azure App Service
+- Azure Application Insights
+- GitHub Actions (CI/CD)
+- GitHub Secrets for environment variables
+
+Testing:
+- pytest
+- httpx
+
+---
+
+## Setup Instructions (Local)
+
+1. Clone the repository  
+   git clone https://github.com/<your-org>/weather-watcher.git  
+   cd weather-watcher  
+
+2. Create a virtual environment and install dependencies  
+   python -m venv venv  
+   source venv/bin/activate  
+   pip install -r requirements.txt  
+
+3. Set environment variables  
+   OPENWEATHER_API_KEY=your_key  
+   GOOGLE_PLACES_API_KEY=your_key  
+
+4. Run the application  
+   uvicorn app.main:app --reload  
+
+5. Run tests  
+   pytest  
+
+---
+
+## Deployment & CI/CD
+
+The project uses **GitHub Actions** for Continuous Integration and Continuous Deployment.
+
+Pipeline behavior:
+- Triggers on push or merge to main
+- Installs dependencies
+- Runs all automated tests
+- Deploys to Azure App Service on success
+- Blocks deployment if tests fail
+
+This ensures consistent, reliable, and repeatable deployments.
+
+---
+
+## Monitoring & Observability
+
+The application is monitored using **Azure Application Insights**, which provides:
+
+- Request and dependency tracking
+- Error and exception logging
+- Response time monitoring
+- Custom telemetry for weather searches and city autocomplete usage
+- Alerts for failures and unhealthy states
+
+Dashboards and log queries were used to validate telemetry and system health.
+
+---
 
 ## API Endpoints
 
-### Core Endpoints
+Root  
+GET /  
+Returns the main application interface.
 
-- `GET /` - Homepage with weather search UI
-- `GET /health` - Health check endpoint
-- `GET /api/info` - Project information
+Health Check  
+GET /health  
+Returns application health status for monitoring.
 
-### Weather Endpoints
+Weather  
+GET /api/weather?city=<city>  
+Returns current weather data for a city.
 
-- `GET /api/weather?city={city}` - Get current weather by city (query parameter)
-- `GET /weather/{city}` - Get current weather by city (path parameter)
-- `GET /api/forecast?city={city}` - Get 5-day weather forecast
+Forecast  
+GET /api/forecast?city=<city>  
+Returns a 5-day weather forecast.
 
-### Utility Endpoints
+Autocomplete  
+GET /api/cities/autocomplete?query=<text>  
+Returns city suggestions using Google Places API.
 
-- `GET /api/cities/autocomplete?query={query}` - City autocomplete suggestions
-- `GET /api/debug` - Debug configuration (development only)
+---
 
-## Team
+## Scrum & Sprint Summary
 
-### Current Team (Sprint 3)
+The project was developed over **4 sprints** using Scrum methodology.
 
-- **Product Owner:** Omar
-- **Scrum Master:** Kenny
-- **Developer 1 (Backend/API):** Jack
-- **Developer 2 (Frontend):** Adrian
-- **Developer 3 (Monitoring/Testing):** Salmane
+- Sprint 1: Infrastructure setup and CI/CD foundation  
+- Sprint 2: Core weather functionality  
+- Sprint 3: Advanced features and UX improvements  
+- Sprint 4: Documentation, monitoring, cleanup, and final submission  
 
-### Sprint History
+Detailed sprint planning and retrospectives are available in the docs/sprints folder.
 
-- **Sprint 1:** November 25-29, 2025 (5 days) - Infrastructure & Deployment
-- **Sprint 2:** December 2-4, 2025 (3 days) - Core Weather Features
-- **Sprint 3:** December 5-8, 2025 (4 days) - Enhancements & Optimization
+---
 
-## Documentation
+## Team Contributions (Sprint 4 Roles)
 
-### Project Documentation
-- [Product Backlog](docs/product-backlog.md)
-- [Definition of Done](docs/definition-of-done.md)
-- [Architecture Documentation](docs/architecture.md)
-- [CI/CD Pipeline Documentation](docs/CI-CD-Pipeline-Documentation.md)
+| Name | Role | Contributions |
+|------|------|---------------|
+| Omar El Hajj Chehade | Scrum Master | Documentation leadership, retrospectives, architecture, final submission |
+| Adrian | Product Owner | Backlog prioritization, requirements validation, UX direction |
+| Kenny | Developer | Backend support, CI/CD validation, telemetry assistance |
+| Jack | Developer | Backend features, API integration, testing |
+| Salmane | Developer | Monitoring, Application Insights, dashboards |
 
-### Sprint Documentation
-- [Sprint 1 Planning](docs/sprints/sprint1-planning.md)
-- [Sprint 2 Planning](docs/sprints/sprint2-planning.md)
-- [Sprint 2 Daily Scrum Notes](docs/sprints/sprint2-daily-scrum-notes.md)
-- [Sprint 2 Retrospective](docs/sprints/sprint2-retrospective.md)
-- [Sprint 3 Planning](docs/sprints/sprint3-planning.md)
-- [Sprint 3 Retrospective](docs/sprints/sprint3-retrospective.md)
+---
 
-## Links
+## Lessons Learned
 
-- _Azure DevOps:_ [https://adasilvaieu2023@dev.azure.com/adasilvaieu2023/devops%20group%20project%20Adrian/_git/weather%20watcher]
-- _Live App:_ Coming soon
+- CI/CD automation significantly improves reliability
+- Monitoring and telemetry should be integrated early
+- Documentation must be treated as a first-class deliverable
+- Clear Git workflows prevent last-minute issues
+- Cloud free tiers introduce limitations such as cold starts
 
-## Current Status
+---
 
-### ✅ Completed Features
+## Project Status
 
-- [x] Local development setup
-- [x] FastAPI application with multiple endpoints
-- [x] Azure App Service deployment
-- [x] CI/CD pipeline with Azure DevOps
-- [x] Weather API integration (Google Maps Weather API)
-- [x] City autocomplete functionality
-- [x] Modern responsive UI with dark theme
-- [x] Application Insights monitoring
-- [x] Comprehensive test suite
-- [x] Error handling and user feedback
-- [x] Country name conversion
-
-### 🔄 In Progress (Sprint 3)
-
-- [ ] 5-day forecast API integration (OpenWeatherMap)
-- [ ] Enhanced monitoring dashboard
-- [ ] Performance optimizations (caching)
-- [ ] Test coverage >85%
-- [ ] Enhanced error handling with retry logic
+Completed  
+The Weather Watcher project is fully implemented, deployed, monitored, and documented, and is ready for academic evaluation.
 
 ---
 
