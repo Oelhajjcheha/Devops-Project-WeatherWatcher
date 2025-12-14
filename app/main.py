@@ -1924,6 +1924,84 @@ def read_root():
                     gap: 8px;
                 }
             }
+
+            /* ============================================
+               CLOTHING RECOMMENDATIONS
+               ============================================ */
+            .clothing-recommendations {
+                margin-top: 30px;
+                padding: 25px;
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                animation: fadeIn 0.5s ease;
+            }
+
+            .clothing-title {
+                font-size: 1.2rem;
+                color: var(--text-primary);
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .clothing-title i {
+                color: var(--accent);
+                font-size: 1.3rem;
+            }
+
+            .clothing-items {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 15px;
+            }
+
+            .clothing-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 15px;
+                background: var(--bg-secondary);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                transition: all 0.3s ease;
+            }
+
+            .clothing-item:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 4px 12px var(--shadow);
+                border-color: var(--accent);
+            }
+
+            .clothing-icon {
+                font-size: 2rem;
+                flex-shrink: 0;
+            }
+
+            .clothing-text {
+                font-size: 0.95rem;
+                color: var(--text-primary);
+                font-weight: 500;
+            }
+
+            @media (max-width: 768px) {
+                .clothing-items {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+                
+                .clothing-item {
+                    padding: 12px;
+                }
+                
+                .clothing-icon {
+                    font-size: 1.5rem;
+                }
+                
+                .clothing-text {
+                    font-size: 0.85rem;
+                }
+            }
         </style>
     </head>
     <body>
@@ -2061,7 +2139,17 @@ def read_root():
                         <span class="weather-detail-value" id="weatherPressure"></span>
                     </div>
                 </div>
-                
+
+                <!-- Clothing Recommendations Section -->
+                <div class="clothing-recommendations" id="clothingRecommendations" style="display: none;">
+                    <h3 class="clothing-title">
+                        <i class="fas fa-tshirt"></i> What to Wear
+                    </h3>
+                    <div class="clothing-items" id="clothingItems">
+                        <!-- Items will be added by JavaScript -->
+                    </div>
+                </div>
+
                 <!-- Add to Comparison Button -->
                 <button class="add-to-comparison-btn" id="addToComparisonBtn">
                     <i class="fas fa-plus"></i>
@@ -2524,8 +2612,15 @@ def read_root():
                     displayWeather(data);
                     showSuccessToast();
                     
-                    // Fetch forecast
-                    fetchForecast(data.city);
+                // Show weather display
+                weatherDisplay.classList.add('show');
+            
+                // Display clothing recommendations
+                displayClothingRecommendations(data.temperature, data.description, data.wind_speed);
+            
+                // Fetch and display 5-day forecast
+                fetchForecast(data.city);
+        }
                     
                 } catch (error) {
                     console.error('Weather fetch error:', error);
@@ -2594,6 +2689,84 @@ def read_root():
                     addToComparisonBtn.querySelector('i').className = 'fas fa-plus';
                 }
             }
+
+            // ============================================
+        // CLOTHING RECOMMENDATIONS
+        // ============================================
+        function getClothingRecommendations(temp, condition, wind) {
+            const items = [];
+            
+            // Temperature-based recommendations
+            if (temp > 30) {
+                items.push({ icon: "👕", text: "Light T-shirt" });
+                items.push({ icon: "🩳", text: "Shorts" });
+                items.push({ icon: "🕶️", text: "Sunglasses" });
+                items.push({ icon: "🧴", text: "Sunscreen" });
+            } else if (temp > 25) {
+                items.push({ icon: "👕", text: "T-shirt" });
+                items.push({ icon: "👖", text: "Light pants" });
+                items.push({ icon: "🕶️", text: "Sunglasses" });
+                items.push({ icon: "🧢", text: "Cap" });
+            } else if (temp > 15) {
+                items.push({ icon: "👔", text: "Long sleeves" });
+                items.push({ icon: "👖", text: "Jeans" });
+                items.push({ icon: "🧥", text: "Light jacket" });
+            } else if (temp > 5) {
+                items.push({ icon: "🧥", text: "Jacket" });
+                items.push({ icon: "👖", text: "Long pants" });
+                items.push({ icon: "🧣", text: "Scarf" });
+            } else {
+                items.push({ icon: "🧥", text: "Heavy coat" });
+                items.push({ icon: "🧤", text: "Gloves" });
+                items.push({ icon: "🧣", text: "Scarf" });
+                items.push({ icon: "🎩", text: "Warm hat" });
+            }
+            
+            // Condition-based additions
+            const conditionLower = condition.toLowerCase();
+            
+            if (conditionLower.includes("rain") || conditionLower.includes("drizzle")) {
+                items.push({ icon: "☔", text: "Umbrella" });
+                items.push({ icon: "🥾", text: "Waterproof shoes" });
+            }
+            
+            if (conditionLower.includes("snow")) {
+                items.push({ icon: "🧤", text: "Gloves" });
+                items.push({ icon: "👢", text: "Snow boots" });
+            }
+            
+            if (wind > 20) {
+                items.push({ icon: "🧥", text: "Windbreaker" });
+            }
+            
+            // Return max 4 items to keep it clean
+            return items.slice(0, 4);
+        }
+
+        function displayClothingRecommendations(temp, condition, wind) {
+            const clothingSection = document.getElementById('clothingRecommendations');
+            const clothingItems = document.getElementById('clothingItems');
+            
+            // Get recommendations
+            const recommendations = getClothingRecommendations(temp, condition, wind);
+            
+            // Clear previous items
+            clothingItems.innerHTML = '';
+            
+            // Create and add clothing items
+            recommendations.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'clothing-item';
+                itemDiv.innerHTML = `
+                    <span class="clothing-icon">${item.icon}</span>
+                    <span class="clothing-text">${item.text}</span>
+                `;
+                clothingItems.appendChild(itemDiv);
+            });
+            
+            // Show the section
+            clothingSection.style.display = 'block';
+        }
             
             // ============================================
             // FORECAST FETCH & DISPLAY
