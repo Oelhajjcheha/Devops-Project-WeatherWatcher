@@ -2706,16 +2706,29 @@ def read_root():
                 items.push({ icon: "👖", text: "Light pants" });
                 items.push({ icon: "🕶️", text: "Sunglasses" });
                 items.push({ icon: "🧢", text: "Cap" });
+            } else if (temp > 20) {
+                // Pleasant weather - 20-25°C (68-77°F)
+                items.push({ icon: "👕", text: "T-shirt or long sleeves" });
+                items.push({ icon: "👖", text: "Comfortable pants" });
+                items.push({ icon: "🕶️", text: "Sunglasses" });
             } else if (temp > 15) {
+                // Cool weather - 15-20°C (59-68°F)
                 items.push({ icon: "👔", text: "Long sleeves" });
                 items.push({ icon: "👖", text: "Jeans" });
-                items.push({ icon: "🧥", text: "Light jacket" });
-            } else if (temp > 5) {
+                items.push({ icon: "🧥", text: "Light jacket (optional)" });
+            } else if (temp > 10) {
+                // Cold weather - 10-15°C (50-59°F)
                 items.push({ icon: "🧥", text: "Jacket" });
                 items.push({ icon: "👖", text: "Long pants" });
+                items.push({ icon: "🧣", text: "Scarf (optional)" });
+            } else if (temp > 5) {
+                // Very cold - 5-10°C (41-50°F)
+                items.push({ icon: "🧥", text: "Heavy jacket" });
                 items.push({ icon: "🧣", text: "Scarf" });
+                items.push({ icon: "🧤", text: "Gloves" });
             } else {
-                items.push({ icon: "🧥", text: "Heavy coat" });
+                // Freezing - < 5°C (41°F)
+                items.push({ icon: "🧥", text: "Winter coat" });
                 items.push({ icon: "🧤", text: "Gloves" });
                 items.push({ icon: "🧣", text: "Scarf" });
                 items.push({ icon: "🎩", text: "Warm hat" });
