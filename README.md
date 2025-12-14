@@ -73,7 +73,7 @@ Testing:
 ## Setup Instructions (Local)
 
 1. Clone the repository  
-   git clone https://github.com/<your-org>/weather-watcher.git  
+   git clone https://github.com/Oelhajjcheha/Devops-Project-WeatherWatcher.git
    cd weather-watcher  
 
 2. Create a virtual environment and install dependencies  
