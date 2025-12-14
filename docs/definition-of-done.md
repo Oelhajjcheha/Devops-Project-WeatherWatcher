@@ -1,4 +1,4 @@
-markdown# Definition of Done
+# Definition of Done
 
 A Product Backlog item is considered *DONE* when:
 
