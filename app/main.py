@@ -251,6 +251,12 @@ def read_root():
                 /* Skeleton loading colors */
                 --skeleton-base: #1e293b;
                 --skeleton-shine: #334155;
+                
+                /* Comparison tool colors */
+                --comparison-highlight: #fbbf24;
+                --comparison-highlight-glow: rgba(251, 191, 36, 0.3);
+                --comparison-best: #10b981;
+                --comparison-worst: #ef4444;
             }
             
             /* ============================================
@@ -1354,6 +1360,341 @@ def read_root():
             }
             
             /* ============================================
+               COMPARISON TOOL SECTION
+               ============================================ */
+            .comparison-section {
+                margin-top: 40px;
+                display: none;
+            }
+            
+            .comparison-section.show {
+                display: block;
+                animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            
+            .comparison-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 24px;
+            }
+            
+            .comparison-title {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--text-primary);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            
+            .comparison-title i {
+                background: var(--accent-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+            
+            .comparison-count {
+                background: var(--bg-secondary);
+                padding: 6px 14px;
+                border-radius: 12px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: var(--accent-primary);
+                border: 1px solid var(--border);
+            }
+            
+            .comparison-actions {
+                display: flex;
+                gap: 12px;
+            }
+            
+            .clear-comparison-btn {
+                padding: 10px 18px;
+                background: var(--bg-secondary);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .clear-comparison-btn:hover {
+                background: var(--bg-card-hover);
+                border-color: var(--error);
+                color: var(--error);
+                transform: translateY(-2px);
+            }
+            
+            .add-to-comparison-btn {
+                background: var(--comparison-highlight);
+                color: #000;
+                padding: 12px 20px;
+                border: none;
+                border-radius: 12px;
+                font-size: 0.95rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-top: 16px;
+                width: 100%;
+                justify-content: center;
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .add-to-comparison-btn::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .add-to-comparison-btn:hover::before {
+                opacity: 1;
+            }
+            
+            .add-to-comparison-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 24px var(--comparison-highlight-glow);
+            }
+            
+            .add-to-comparison-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                transform: none;
+            }
+            
+            .add-to-comparison-btn.added {
+                background: var(--success);
+                color: white;
+            }
+            
+            .add-to-comparison-btn.added i {
+                animation: checkmark 0.5s ease;
+            }
+            
+            .comparison-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 20px;
+            }
+            
+            .comparison-card {
+                background: var(--bg-card);
+                border: 2px solid var(--border);
+                border-radius: 20px;
+                padding: 24px;
+                position: relative;
+                transition: all 0.3s ease;
+                animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            
+            .comparison-card:hover {
+                border-color: var(--comparison-highlight);
+                box-shadow: 0 8px 32px var(--comparison-highlight-glow);
+                transform: translateY(-4px);
+            }
+            
+            .comparison-card.best-temp {
+                border-color: var(--comparison-best);
+                background: linear-gradient(135deg, var(--bg-card) 0%, rgba(16, 185, 129, 0.05) 100%);
+            }
+            
+            .comparison-card.worst-temp {
+                border-color: var(--comparison-worst);
+                background: linear-gradient(135deg, var(--bg-card) 0%, rgba(239, 68, 68, 0.05) 100%);
+            }
+            
+            .comparison-badge {
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                padding: 4px 10px;
+                border-radius: 8px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+            
+            .comparison-badge.warmest {
+                background: var(--comparison-best);
+                color: white;
+            }
+            
+            .comparison-badge.coldest {
+                background: var(--comparison-worst);
+                color: white;
+            }
+            
+            .comparison-card-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 20px;
+                padding-right: 60px;
+            }
+            
+            .comparison-location {
+                flex: 1;
+            }
+            
+            .comparison-city {
+                font-size: 1.25rem;
+                font-weight: 700;
+                color: var(--text-primary);
+                margin-bottom: 4px;
+            }
+            
+            .comparison-country {
+                font-size: 0.85rem;
+                color: var(--text-secondary);
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            
+            .comparison-icon {
+                font-size: 3rem;
+                background: var(--accent-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+            
+            .comparison-temp {
+                font-size: 2.5rem;
+                font-weight: 800;
+                color: var(--text-primary);
+                font-family: 'JetBrains Mono', monospace;
+                margin: 12px 0;
+                position: relative;
+            }
+            
+            .comparison-temp-indicator {
+                position: absolute;
+                right: -30px;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 1.5rem;
+            }
+            
+            .comparison-temp-indicator.up {
+                color: var(--comparison-worst);
+            }
+            
+            .comparison-temp-indicator.down {
+                color: var(--comparison-best);
+            }
+            
+            .comparison-description {
+                font-size: 0.9rem;
+                color: var(--text-secondary);
+                margin-bottom: 16px;
+                text-transform: capitalize;
+            }
+            
+            .comparison-metrics {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+                margin-top: 16px;
+                padding-top: 16px;
+                border-top: 1px solid var(--border);
+            }
+            
+            .comparison-metric {
+                text-align: center;
+            }
+            
+            .comparison-metric-label {
+                font-size: 0.75rem;
+                color: var(--text-muted);
+                margin-bottom: 4px;
+                display: block;
+            }
+            
+            .comparison-metric-value {
+                font-size: 0.95rem;
+                font-weight: 600;
+                color: var(--text-primary);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+            }
+            
+            .comparison-metric i {
+                color: var(--accent-primary);
+                font-size: 0.85rem;
+            }
+            
+            .remove-comparison-btn {
+                position: absolute;
+                top: 12px;
+                left: 12px;
+                width: 32px;
+                height: 32px;
+                background: var(--bg-secondary);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                color: var(--text-muted);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                z-index: 10;
+            }
+            
+            .remove-comparison-btn:hover {
+                background: var(--error);
+                border-color: var(--error);
+                color: white;
+                transform: scale(1.1);
+            }
+            
+            .comparison-empty {
+                text-align: center;
+                padding: 60px 40px;
+                background: var(--bg-card);
+                border: 2px dashed var(--border);
+                border-radius: 20px;
+                color: var(--text-secondary);
+            }
+            
+            .comparison-empty i {
+                font-size: 3rem;
+                color: var(--text-muted);
+                margin-bottom: 16px;
+                opacity: 0.5;
+            }
+            
+            .comparison-empty-title {
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: var(--text-primary);
+                margin-bottom: 8px;
+            }
+            
+            .comparison-empty-text {
+                font-size: 0.9rem;
+            }
+            
+            /* ============================================
                SUCCESS INDICATOR
                ============================================ */
             .success-indicator {
@@ -1477,6 +1818,25 @@ def read_root():
                 .forecast-section {
                     padding: 0 16px;
                 }
+                
+                .comparison-container {
+                    grid-template-columns: 1fr;
+                }
+                
+                .comparison-header {
+                    flex-direction: column;
+                    gap: 16px;
+                    align-items: stretch;
+                }
+                
+                .comparison-actions {
+                    width: 100%;
+                }
+                
+                .clear-comparison-btn {
+                    flex: 1;
+                    justify-content: center;
+                }
             }
             
             @media (max-width: 480px) {
@@ -1494,6 +1854,19 @@ def read_root():
                 
                 .weather-skeleton-details {
                     grid-template-columns: 1fr;
+                }
+                
+                .comparison-card-header {
+                    padding-right: 0;
+                }
+                
+                .comparison-temp {
+                    font-size: 2rem;
+                }
+                
+                .comparison-metrics {
+                    grid-template-columns: 1fr;
+                    gap: 8px;
                 }
             }
         </style>
@@ -1626,6 +1999,12 @@ def read_root():
                         <span class="weather-detail-value" id="weatherPressure"></span>
                     </div>
                 </div>
+                
+                <!-- Add to Comparison Button -->
+                <button class="add-to-comparison-btn" id="addToComparisonBtn">
+                    <i class="fas fa-plus"></i>
+                    <span id="addToComparisonText">Add to Comparison</span>
+                </button>
             </section>
             
             <!-- Forecast skeleton -->
@@ -1646,6 +2025,32 @@ def read_root():
                     <i class="fas fa-calendar-week"></i> 5-Day Forecast
                 </h2>
                 <div class="forecast-container" id="forecastContainer"></div>
+            </section>
+            
+            <!-- Weather Comparison Section -->
+            <section class="comparison-section" id="comparisonSection">
+                <div class="comparison-header">
+                    <div>
+                        <h2 class="comparison-title">
+                            <i class="fas fa-balance-scale"></i>
+                            Weather Comparison
+                        </h2>
+                        <span class="comparison-count" id="comparisonCount">0 cities</span>
+                    </div>
+                    <div class="comparison-actions">
+                        <button class="clear-comparison-btn" id="clearComparisonBtn">
+                            <i class="fas fa-trash"></i>
+                            Clear All
+                        </button>
+                    </div>
+                </div>
+                <div class="comparison-container" id="comparisonContainer">
+                    <div class="comparison-empty">
+                        <i class="fas fa-cloud-sun"></i>
+                        <div class="comparison-empty-title">No cities to compare</div>
+                        <div class="comparison-empty-text">Search for a city and click "Add to Comparison" to start comparing weather data</div>
+                    </div>
+                </div>
             </section>
         </div>
         
@@ -1683,11 +2088,21 @@ def read_root():
             const weatherWind = document.getElementById('weatherWind');
             const weatherPressure = document.getElementById('weatherPressure');
             
+            // Comparison elements
+            const addToComparisonBtn = document.getElementById('addToComparisonBtn');
+            const addToComparisonText = document.getElementById('addToComparisonText');
+            const comparisonSection = document.getElementById('comparisonSection');
+            const comparisonContainer = document.getElementById('comparisonContainer');
+            const comparisonCount = document.getElementById('comparisonCount');
+            const clearComparisonBtn = document.getElementById('clearComparisonBtn');
+            
             // State
             let autocompleteTimeout = null;
             let selectedIndex = -1;
             let currentCity = '';
             let loadingInterval = null;
+            let currentWeatherData = null;
+            let comparisonCities = [];
             
             // ============================================
             // WEATHER ICON MAPPING
@@ -2000,6 +2415,9 @@ def read_root():
             // DISPLAY WEATHER DATA
             // ============================================
             function displayWeather(data) {
+                // Store current weather data for comparison
+                currentWeatherData = data;
+                
                 weatherCity.textContent = data.city;
                 weatherCountryText.textContent = data.country || '';
                 weatherIcon.innerHTML = getWeatherIcon(data.icon);
@@ -2013,6 +2431,21 @@ def read_root():
                 // Show with staggered reveal animation
                 weatherDisplay.classList.add('show', 'reveal');
                 cityInput.blur();
+                
+                // Enable/update add to comparison button
+                const existingCity = comparisonCities.find(c => 
+                    c.city.toLowerCase() === data.city.toLowerCase()
+                );
+                
+                if (existingCity) {
+                    addToComparisonBtn.classList.add('added');
+                    addToComparisonText.textContent = 'Already Added';
+                    addToComparisonBtn.querySelector('i').className = 'fas fa-check';
+                } else {
+                    addToComparisonBtn.classList.remove('added');
+                    addToComparisonText.textContent = 'Add to Comparison';
+                    addToComparisonBtn.querySelector('i').className = 'fas fa-plus';
+                }
             }
             
             // ============================================
@@ -2079,6 +2512,178 @@ def read_root():
                 
                 forecastSection.classList.add('show');
             }
+            
+            // ============================================
+            // COMPARISON TOOL FUNCTIONS
+            // ============================================
+            
+            // Add to comparison button handler
+            addToComparisonBtn.addEventListener('click', () => {
+                if (!currentWeatherData) return;
+                
+                // Check if city already exists in comparison
+                const existingCity = comparisonCities.find(c => 
+                    c.city.toLowerCase() === currentWeatherData.city.toLowerCase()
+                );
+                
+                if (existingCity) {
+                    showError('This city is already in the comparison list.');
+                    return;
+                }
+                
+                // Limit to 5 cities
+                if (comparisonCities.length >= 5) {
+                    showError('Maximum 5 cities can be compared at once.');
+                    return;
+                }
+                
+                // Add city to comparison
+                comparisonCities.push({...currentWeatherData});
+                updateComparisonView();
+                
+                // Show success feedback
+                addToComparisonBtn.classList.add('added');
+                addToComparisonText.textContent = 'Added!';
+                const icon = addToComparisonBtn.querySelector('i');
+                icon.className = 'fas fa-check';
+                
+                setTimeout(() => {
+                    addToComparisonBtn.classList.remove('added');
+                    addToComparisonText.textContent = 'Add to Comparison';
+                    icon.className = 'fas fa-plus';
+                }, 2000);
+            });
+            
+            // Clear all comparison button handler
+            clearComparisonBtn.addEventListener('click', () => {
+                if (comparisonCities.length === 0) return;
+                
+                if (confirm('Are you sure you want to clear all cities from comparison?')) {
+                    comparisonCities = [];
+                    updateComparisonView();
+                }
+            });
+            
+            // Update comparison view
+            function updateComparisonView() {
+                // Update count
+                comparisonCount.textContent = `${comparisonCities.length} ${comparisonCities.length === 1 ? 'city' : 'cities'}`;
+                
+                // Show/hide section
+                if (comparisonCities.length > 0) {
+                    comparisonSection.classList.add('show');
+                } else {
+                    comparisonSection.classList.remove('show');
+                }
+                
+                // Clear container
+                comparisonContainer.innerHTML = '';
+                
+                if (comparisonCities.length === 0) {
+                    comparisonContainer.innerHTML = `
+                        <div class="comparison-empty">
+                            <i class="fas fa-cloud-sun"></i>
+                            <div class="comparison-empty-title">No cities to compare</div>
+                            <div class="comparison-empty-text">Search for a city and click "Add to Comparison" to start comparing weather data</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Find warmest and coldest
+                const temps = comparisonCities.map(c => c.temperature);
+                const maxTemp = Math.max(...temps);
+                const minTemp = Math.min(...temps);
+                const avgTemp = temps.reduce((a, b) => a + b, 0) / temps.length;
+                
+                // Render comparison cards
+                comparisonCities.forEach((city, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'comparison-card';
+                    
+                    // Add best/worst temp classes
+                    if (city.temperature === maxTemp && comparisonCities.length > 1) {
+                        card.classList.add('best-temp');
+                    }
+                    if (city.temperature === minTemp && comparisonCities.length > 1) {
+                        card.classList.add('worst-temp');
+                    }
+                    
+                    // Get weather icon
+                    const iconClass = weatherIconMap[city.icon] || 'fa-cloud';
+                    
+                    // Temperature indicator
+                    let tempIndicator = '';
+                    if (comparisonCities.length > 1) {
+                        if (city.temperature > avgTemp) {
+                            tempIndicator = '<i class="fas fa-arrow-up comparison-temp-indicator up"></i>';
+                        } else if (city.temperature < avgTemp) {
+                            tempIndicator = '<i class="fas fa-arrow-down comparison-temp-indicator down"></i>';
+                        }
+                    }
+                    
+                    // Badge for warmest/coldest
+                    let badge = '';
+                    if (city.temperature === maxTemp && comparisonCities.length > 1) {
+                        badge = '<div class="comparison-badge warmest"><i class="fas fa-fire"></i> Warmest</div>';
+                    } else if (city.temperature === minTemp && comparisonCities.length > 1) {
+                        badge = '<div class="comparison-badge coldest"><i class="fas fa-snowflake"></i> Coldest</div>';
+                    }
+                    
+                    card.innerHTML = `
+                        <button class="remove-comparison-btn" onclick="removeFromComparison(${index})" title="Remove from comparison">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        ${badge}
+                        <div class="comparison-card-header">
+                            <div class="comparison-location">
+                                <div class="comparison-city">${city.city}</div>
+                                <div class="comparison-country">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    ${city.country}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comparison-icon"><i class="fas ${iconClass}"></i></div>
+                        <div class="comparison-temp">
+                            ${city.temperature}°
+                            ${tempIndicator}
+                        </div>
+                        <div class="comparison-description">${city.description}</div>
+                        <div class="comparison-metrics">
+                            <div class="comparison-metric">
+                                <span class="comparison-metric-label">Humidity</span>
+                                <div class="comparison-metric-value">
+                                    <i class="fas fa-tint"></i>
+                                    ${city.humidity}%
+                                </div>
+                            </div>
+                            <div class="comparison-metric">
+                                <span class="comparison-metric-label">Wind</span>
+                                <div class="comparison-metric-value">
+                                    <i class="fas fa-wind"></i>
+                                    ${city.wind_speed} m/s
+                                </div>
+                            </div>
+                            <div class="comparison-metric">
+                                <span class="comparison-metric-label">Pressure</span>
+                                <div class="comparison-metric-value">
+                                    <i class="fas fa-compress-arrows-alt"></i>
+                                    ${city.pressure} hPa
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    comparisonContainer.appendChild(card);
+                });
+            }
+            
+            // Global function to remove from comparison (called from inline onclick)
+            window.removeFromComparison = function(index) {
+                comparisonCities.splice(index, 1);
+                updateComparisonView();
+            };
             
             // ============================================
             // FORM SUBMISSION

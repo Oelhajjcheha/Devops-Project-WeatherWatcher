@@ -473,3 +473,198 @@ class TestCountryCodeConversion:
             # Verify the country field contains a full name
             # Mock data uses "US" code which should be converted to "United States"
             assert "United States" in data["country"] or len(data["country"]) > 2
+
+
+# ============================================
+# Comparison Feature Tests (Sprint 4)
+# ============================================
+
+class TestComparisonFeature:
+    """Tests for Weather Comparison Tool functionality."""
+    
+    def test_comparison_section_exists_in_html(self):
+        """Test that comparison section HTML is present on the homepage."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        # Check for comparison section
+        assert 'id="comparisonSection"' in html_content
+        assert 'id="comparisonContainer"' in html_content
+        assert 'Weather Comparison' in html_content
+    
+    def test_add_to_comparison_button_exists(self):
+        """Test that Add to Comparison button is present in HTML."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        assert 'id="addToComparisonBtn"' in html_content
+        assert 'Add to Comparison' in html_content
+    
+    def test_comparison_javascript_functions_exist(self):
+        """Test that comparison JavaScript functions are defined."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        # Check for JavaScript functions
+        assert 'updateComparisonView' in html_content
+        assert 'removeFromComparison' in html_content
+        assert 'comparisonCities' in html_content
+    
+    def test_comparison_css_styles_exist(self):
+        """Test that comparison CSS styles are defined."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        # Check for comparison-specific CSS classes
+        assert '.comparison-section' in html_content
+        assert '.comparison-card' in html_content
+        assert '.comparison-badge' in html_content
+        assert '.add-to-comparison-btn' in html_content
+    
+    def test_comparison_color_variables_defined(self):
+        """Test that comparison color CSS variables are defined."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        assert '--comparison-highlight' in html_content
+        assert '--comparison-best' in html_content
+        assert '--comparison-worst' in html_content
+    
+    def test_comparison_indicators_styling(self):
+        """Test that visual comparison indicators have proper styling."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        # Check for warmest/coldest indicator styles
+        assert '.warmest' in html_content
+        assert '.coldest' in html_content
+        assert 'best-temp' in html_content
+        assert 'worst-temp' in html_content
+    
+    def test_comparison_responsive_design(self):
+        """Test that comparison section has mobile responsive CSS."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        # Check for media queries affecting comparison
+        assert '@media (max-width: 768px)' in html_content or '@media (max-width: 480px)' in html_content
+    
+    def test_comparison_empty_state_html(self):
+        """Test that comparison empty state is properly defined."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        assert 'comparison-empty' in html_content
+        assert 'No cities to compare' in html_content
+    
+    def test_clear_comparison_button_exists(self):
+        """Test that Clear All comparison button exists."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        assert 'id="clearComparisonBtn"' in html_content
+        assert 'Clear All' in html_content
+    
+    def test_comparison_count_display_exists(self):
+        """Test that comparison count display element exists."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        assert 'id="comparisonCount"' in html_content
+    
+    def test_comparison_metrics_display(self):
+        """Test that comparison cards show proper weather metrics."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        # Check for metrics structure in comparison cards
+        assert 'comparison-metrics' in html_content
+        assert 'comparison-metric-label' in html_content
+        assert 'comparison-metric-value' in html_content
+    
+    def test_temperature_indicators_exist(self):
+        """Test that temperature up/down indicators are defined."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        assert 'comparison-temp-indicator' in html_content
+        assert 'fa-arrow-up' in html_content
+        assert 'fa-arrow-down' in html_content
+    
+    def test_remove_button_styling(self):
+        """Test that remove from comparison button has proper styling."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        assert 'remove-comparison-btn' in html_content
+    
+    def test_comparison_animations_defined(self):
+        """Test that comparison-specific animations are defined."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        # Check for animation classes
+        assert 'scaleIn' in html_content or 'fadeSlideUp' in html_content
+    
+    def test_comparison_grid_layout(self):
+        """Test that comparison cards use grid layout."""
+        response = client.get("/")
+        assert response.status_code == 200
+        html_content = response.text
+        
+        assert 'comparison-container' in html_content
+        assert 'grid-template-columns' in html_content
+
+
+# ============================================
+# Integration Test for Full Comparison Flow
+# ============================================
+
+class TestComparisonIntegration:
+    """Integration tests for complete comparison workflow."""
+    
+    def test_weather_data_includes_all_comparison_fields(self):
+        """Test that weather API returns all fields needed for comparison."""
+        with patch.dict("os.environ", {"GOOGLE_MAPS_API_KEY": ""}, clear=False):
+            response = client.get("/api/weather?city=London")
+            assert response.status_code == 200
+            data = response.json()
+            
+            # Verify all required fields for comparison
+            required_fields = [
+                'city', 'country', 'temperature', 'feels_like',
+                'description', 'humidity', 'wind_speed', 'pressure', 'icon'
+            ]
+            
+            for field in required_fields:
+                assert field in data, f"Missing required field: {field}"
+    
+    def test_multiple_cities_weather_data_format(self):
+        """Test that multiple weather requests return consistent data format."""
+        with patch.dict("os.environ", {"GOOGLE_MAPS_API_KEY": ""}, clear=False):
+            cities = ['London', 'Paris', 'Tokyo']
+            responses = []
+            
+            for city in cities:
+                response = client.get(f"/api/weather?city={city}")
+                assert response.status_code == 200
+                responses.append(response.json())
+            
+            # Verify all responses have same structure
+            keys_set = set(responses[0].keys())
+            for response in responses[1:]:
+                assert set(response.keys()) == keys_set
